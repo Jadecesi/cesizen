@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('/main.css') }}">
+    <title>CESIZen - Accueil</title>
+</head>
+<body>
+<header>
+    {% block header %}
+        <img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen">
+        <h1>Bienvenue sur CESIZen</h1>
+        <div class="header-buttons">
+            <a href="{{ path('register') }}" class="button">S'inscrire</a>
+            <a href="{{ path('app_home') }}" class="button">Se connecter</a>
+        </div>
+    {% endblock %}
+</header>
+<main class="main-content">
+    {% block body %}
+        <h2>Votre bien-être, notre priorité</h2>
+        <p style="padding-left: 150px; padding-right: 150px;">
+            Découvrez des outils simples et efficaces pour mieux gérer votre stress et prendre soin de votre santé mentale. Suivez vos émotions, pratiquez des exercices de respiration et explorez des activités détente pour un quotidien équilibré.
+        </p>
+        <div class="buttons">
+            <a href="{{ path('start') }}" class="button">Commencer</a>
+            <a href="{{ path('learn_more') }}" class="button">En savoir plus</a>
+        </div>
+        <img style="width: 250px; height: auto;" src="{{ asset('img/logo-sans-font.png') }}" alt="Image illustrative">
+    {% endblock %}
+</main>
+<footer>
+    {% block footer %}
+        <p>© 2025 CESIZen. Jade POULET.</p>
+        <p><a href="#" style="color: var(--accent-color); text-decoration: none;">Mentions légales</a> | <a href="#" style="color: var(--accent-color); text-decoration: none;">Politique de confidentialité</a></p>
+    {% endblock %}
+</footer>
+</body>
+</html>
