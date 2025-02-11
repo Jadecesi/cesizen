@@ -78,6 +78,10 @@ header img {
     margin-top: 2rem;
 }
 
+a {
+    text-decoration: none;
+}
+
 .button {
     background: var(--primary-color);
     color: white;
