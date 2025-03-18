@@ -82,7 +82,7 @@ class SignupType extends AbstractType
             [
                 'label' => 'S\'inscrire',
                 'attr' => [
-                    'class' => 'btn btn-success-modal'
+                    'class' => 'btn btn-submit-modal'
                 ]
             ]);
     }

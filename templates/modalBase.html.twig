@@ -1,24 +1,19 @@
-<div class="modal" id="dynamicModal" tabindex="-1" role="dialog" style="display: none">
-    <div class="modal-dialog {% block modal_size %}modal-md{% endblock %}" role="document">
-        <div class="modal-content custom-modal">
+<div class="modal fade" id="maModal" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
             <div class="modal-header">
-                <img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen">
-                <h5 class="modal-title" id="modalTitle">{% block modal_title %}Titre de la modal{% endblock %}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <h5 class="modal-title">
+                    {% block modal_title %}
+                        Erreur
+                    {% endblock %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-message-flash" id="modalFlash">
-                {% block modal_message_flash %}
-
-                {% endblock %}
-            </div>
-            <div class="modal-body" id="modalBody">
-                {% block modal_content %}
-                    <p>Contenu par défaut de la modal.</p>
+            <div class="modal-body">
+                {% block modal_body %}
+                    Erreur lors du chargement du contenu
                 {% endblock %}
             </div>
         </div>
     </div>
 </div>
-{% block modal_script %}{% endblock %}

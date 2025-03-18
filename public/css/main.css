@@ -31,11 +31,10 @@ header {
 header img {
     height: 50px;
     margin-left: 50px;
-    margin-right: 150px;
 }
 
 .header-buttons {
-    margin-right: 1rem;
+    margin-right: 1.5rem;
 }
 
 .header-buttons .button {
@@ -92,6 +91,7 @@ a {
     cursor: pointer;
     transition: background 0.3s;
     margin: 0 0.5rem;
+    text-decoration: none;
 }
 
 .button:hover {

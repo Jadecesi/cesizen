@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ asset('/css/main.css') }}">
     <link rel="stylesheet" href="{{ asset('/css/modal.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}" type="text/css" />
     <link rel="icon" type="image/x-icon" href="{{ asset('/img/logo-sans-font.png') }}">
     <title>CESIZen - Accueil</title>
 </head>
@@ -13,7 +14,13 @@
     {% block header %}
         {% if is_granted('IS_AUTHENTICATED_FULLY') %}
             <img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen">
-            <h1>Bienvenue {{ app.user.username }}</h1>
+            <h1>Bienvenue
+        {% if app.user.username == null %}
+            {{ app.user.prenom }} {{ app.user.nom }}
+        {% else %}
+                {{ app.user.username }}
+        {% endif %}
+            </h1>
             <div class="header-buttons">
                 <a href="{{ path('app_logout') }}" class="button">Se déconnecter</a>
             </div>
@@ -21,8 +28,8 @@
         <img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen">
         <h1>Bienvenue sur CESIZen</h1>
         <div class="header-buttons">
-            <a href="{{ path('app_signup') }}" class="button open-modal">S'inscrire</a>
-            <a href="{{ path('app_login') }}" class="button open-modal">Se connecter</a>
+            <a href="{{ path('app_signup') }}" class="button" data-bs-toggle="modal" data-bs-target="#signupModal">S'inscrire</a>
+            <a href="{{ path('app_login') }}" class="button" data-bs-toggle="modal" data-bs-target="#maModal">Se connecter</a>
         </div>
         {% endif %}
     {% endblock %}
@@ -49,6 +56,23 @@
 
 {% include 'modalBase.html.twig' %}
 
-<script src="{{ asset('/js/main.js') }}"></script>
+<script src="{{ asset('js/bootstrap.min.js')}}"></script>
+{#<script>#}
+{#    document.addEventListener('DOMContentLoaded', function() {#}
+{#        const modalElement = document.getElementById('maModal');#}
+{#        const modal = new bootstrap.Modal(modalElement, {#}
+{#            keyboard: true,#}
+{#            backdrop: true#}
+{#        });#}
+
+{#        const modalTriggers = document.querySelectorAll('[data-bs-toggle="modal"]');#}
+{#        modalTriggers.forEach(trigger => {#}
+{#            trigger.addEventListener('click', function(e) {#}
+{#                e.preventDefault();#}
+{#                modal.show();#}
+{#            });#}
+{#        });#}
+{#    });#}
+{#</script>#}
 </body>
 </html>

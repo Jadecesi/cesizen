@@ -107,7 +107,7 @@
     cursor: pointer;
 }
 
-.custom-modal .btn-success-modal {
+.custom-modal .btn-submit-modal {
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
     color: white;
 }
@@ -198,19 +198,15 @@ input:required, select:required, textarea:required {
     border-left: 4px solid var(--accent-color); /* Ajoute un indicateur visuel */
 }
 
-.flash-success {
-    color: green;
-    background-color: #d4edda;
-    padding: 10px;
-    border-radius: 5px;
+.flash-error {
+    color: red;
+    font-weight: bold;
     margin-bottom: 10px;
 }
 
-.flash-error {
-    color: red;
-    background-color: #f8d7da;
-    padding: 10px;
-    border-radius: 5px;
+.flash-success {
+    color: green;
+    font-weight: bold;
     margin-bottom: 10px;
 }
 

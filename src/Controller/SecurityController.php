@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use AllowDynamicProperties;
 use App\Entity\Utilisateur;
 use App\Form\Security\LoginType;
 use App\Form\Security\SignupType;
 use App\Repository\RoleRepository;
+use App\Repository\UtilisateurRepository;
 use App\Security\AuthentificationAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,25 +19,38 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator;
 
-class SecurityController extends AbstractController
+#[AllowDynamicProperties] class SecurityController extends AbstractController
 {
+    private RoleRepository $roleRepository;
+    private UtilisateurRepository $utilisateurRepository;
+
+    public function __construct
+    (
+        RoleRepository $roleRepository,
+        UtilisateurRepository $utilisateurRepository
+    )
+    {
+        $this->roleRepository = $roleRepository;
+        $this->utilisateurRepository = $utilisateurRepository;
+    }
+
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
-        if ($this->getUser()) {
-            return $this->redirectToRoute('app_home');
-        }
+        // Get the login error if there is one
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        // Last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
 
         $form = $this->createForm(LoginType::class);
         $form->handleRequest($request);
 
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->redirectToRoute('app_home');
+        }
 
         return $this->render('security/login.html.twig', [
-            'form' => $form->createView(),
             'last_username' => $lastUsername,
             'error' => $error,
         ]);
@@ -48,18 +63,16 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/signup', name: 'app_signup')]
-    public function signup(Request $request, EntityManagerInterface $entityManager, RoleRepository $roleRepository, UserAuthenticatorInterface $userAuthenticator, AuthentificationAuthenticator $authenticator): Response
+    public function signup(Request $request, EntityManagerInterface $entityManager, UserAuthenticatorInterface $userAuthenticatorInterface, AuthentificationAuthenticator $authenticator): Response
     {
-        dump($request->request->all());
-        $form = $this->createForm(SignupType::class);
+        $utilisateur = new Utilisateur();
+        $form = $this->createForm(SignupType::class, $utilisateur);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dump('Form submitted and valid');
-            $user = $form->getData();
-
-            if ($user['password'] !== $user['confirmPassword']) {
+            // Vérification du mot de passe
+            if ($utilisateur->getPassword() !== $form->get('confirmPassword')->getData()) {
                 $this->addFlash('error', 'Les mots de passe ne correspondent pas');
 
                 return $this->render('security/signup.html.twig', [
@@ -67,15 +80,18 @@ class SecurityController extends AbstractController
                 ]);
             }
 
-            $role = $roleRepository->findOneBy(['nom' => 'Utilisateur']);
+            // Vérification de l'email unique
+            $userExiste = $this->utilisateurRepository->findOneBy(['email' => $utilisateur->getEmail()]);
+            if ($userExiste !== null) {
+                $this->addFlash('error', 'Un utilisateur avec cet email existe déjà');
 
-            $utilisateur = new Utilisateur();
-            $utilisateur->setPrenom($user['prenom']);
-            $utilisateur->setNom($user['nom']);
-            $utilisateur->setUsername($user['username']);
-            $utilisateur->setEmail($user['email']);
-            $utilisateur->setDateNaissance($user['dateNaissance']);
-            $utilisateur->setPassword($user['confirmPassword']);
+                return $this->render('security/signup.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
+            // Attribution du rôle
+            $role = $this->roleRepository->findOneBy(['nom' => 'Utilisateur']);
             $utilisateur->setRole($role);
 
             $entityManager->persist($utilisateur);
@@ -83,7 +99,7 @@ class SecurityController extends AbstractController
 
             $this->addFlash('success', 'Inscription réussie !');
 
-            return $userAuthenticator->authenticateUser(
+            return $userAuthenticatorInterface->authenticateUser(
                 $utilisateur,
                 $authenticator,
                 $request
