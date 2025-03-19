@@ -79,7 +79,7 @@ header img {
 }
 
 a {
-    text-decoration: none;
+    text-decoration: none !important;
 }
 
 .button {

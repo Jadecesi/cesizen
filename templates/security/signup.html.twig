@@ -5,28 +5,32 @@
 {% endblock %}
 
 {% block modal_message_flash %}
-    {% for label, messages in app.flashes(['success', 'error']) %}
-        {% for message in messages %}
-            <div class="flash-{{ label }}">
-                {{ message }}
-            </div>
-        {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
     {% endfor %}
 {% endblock %}
 
 {% block modal_content %}
-    {{ form_start(form) }}
-    {{ form_row(form.prenom) }}
-    {{ form_row(form.nom) }}
-    {{ form_row(form.dateNaissance) }}
-    {{ form_row(form.username) }}
-    {{ form_row(form.email) }}
-    {{ form_row(form.password) }}
-    {{ form_row(form.confirmPassword) }}
-    <div style="display: flex; justify-content: center;">
-        {{ form_label(form.submit) }}
-        {{ form_widget(form.submit) }}
+    <div class="form-container">
+        {{ form_start(form, {'action': path('app_signup') }) }}
+        {{ form_row(form.prenom) }}
+        {{ form_row(form.nom) }}
+        {{ form_row(form.dateNaissance) }}
+        {{ form_row(form.username) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.password) }}
+        {{ form_row(form.confirmPassword) }}
+        <div style="display: flex; justify-content: center;">
+            {{ form_label(form.submit) }}
+            {{ form_widget(form.submit) }}
+        </div>
+        {{ form_end(form) }}
     </div>
-    {{ form_end(form) }}
 {% endblock %}
-

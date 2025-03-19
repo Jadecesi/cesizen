@@ -6,6 +6,7 @@ use App\Entity\Utilisateur;
 use App\Form\Security\LoginType;
 use App\Form\Security\SignupType;
 use App\Repository\RoleRepository;
+use App\Repository\UtilisateurRepository;
 use App\Security\AuthentificationAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -48,19 +49,26 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/signup', name: 'app_signup')]
-    public function signup(Request $request, EntityManagerInterface $entityManager, RoleRepository $roleRepository, UserAuthenticatorInterface $userAuthenticator, AuthentificationAuthenticator $authenticator): Response
+    public function signup(Request $request, EntityManagerInterface $entityManager, RoleRepository $roleRepository, UserAuthenticatorInterface $userAuthenticator, AuthentificationAuthenticator $authenticator, UtilisateurRepository $utilisateurRepository): Response
     {
-        dump($request->request->all());
         $form = $this->createForm(SignupType::class);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            dump('Form submitted and valid');
             $user = $form->getData();
 
             if ($user['password'] !== $user['confirmPassword']) {
                 $this->addFlash('error', 'Les mots de passe ne correspondent pas');
+
+                return $this->render('security/signup.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
+            $userExiste = $utilisateurRepository->findOneBy(['email' => $user['email']]);
+
+            if (!empty($userExiste)) {
+                $this->addFlash('error', 'Un utilisateur avec cet email existe déjà');
 
                 return $this->render('security/signup.html.twig', [
                     'form' => $form->createView(),
@@ -80,8 +88,6 @@ class SecurityController extends AbstractController
 
             $entityManager->persist($utilisateur);
             $entityManager->flush();
-
-            $this->addFlash('success', 'Inscription réussie !');
 
             return $userAuthenticator->authenticateUser(
                 $utilisateur,
