@@ -3,18 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ asset('/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/modal.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('/img/logo-sans-font.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>CESIZen - Accueil</title>
 </head>
 <body>
 <header>
     {% block header %}
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen">
+            {% if app.user.username is null %}
+                <h1>Bienvenue {{ app.user.prenom }} {{ app.user.nom }}</h1>
+            {% else %}
+                <h1>Bienvenue {{ app.user.username }}</h1>
+            {% endif %}
+            <div class="header-buttons">
+                <a href="{{ path('app_logout') }}" class="button">Se déconnecter</a>
+            </div>
+        {% else %}
         <img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen">
         <h1>Bienvenue sur CESIZen</h1>
         <div class="header-buttons">
-            <a href="{{ path('register') }}" class="button">S'inscrire</a>
-            <a href="{{ path('app_home') }}" class="button">Se connecter</a>
+            <a href="{{ path('app_signup') }}" class="button" data-target="modal">S'inscrire</a>
+            <a href="{{ path('app_login') }}" class="button" data-target="modal">Se connecter</a>
         </div>
+        {% endif %}
     {% endblock %}
 </header>
 <main class="main-content">
@@ -24,8 +39,8 @@
             Découvrez des outils simples et efficaces pour mieux gérer votre stress et prendre soin de votre santé mentale. Suivez vos émotions, pratiquez des exercices de respiration et explorez des activités détente pour un quotidien équilibré.
         </p>
         <div class="buttons">
-            <a href="{{ path('start') }}" class="button">Commencer</a>
-            <a href="{{ path('learn_more') }}" class="button">En savoir plus</a>
+            <a href="#" class="button">Commencer</a>
+            <a href="#" class="button">En savoir plus</a>
         </div>
         <img style="width: 250px; height: auto;" src="{{ asset('img/logo-sans-font.png') }}" alt="Image illustrative">
     {% endblock %}
@@ -36,5 +51,13 @@
         <p><a href="#" style="color: var(--accent-color); text-decoration: none;">Mentions légales</a> | <a href="#" style="color: var(--accent-color); text-decoration: none;">Politique de confidentialité</a></p>
     {% endblock %}
 </footer>
+
+{% include 'modalBase.html.twig' %}
+
+<script src="{{ asset('/js/main.js') }}"></script>
+<script src="{{ asset('/js/bootstrap.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ asset('/js/modal.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

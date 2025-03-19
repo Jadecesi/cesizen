@@ -1,0 +1,17 @@
+<div class="modal--overlay" aria-hidden="true">
+    <div class="modal--content">
+        <div class="modal--header">
+            <img src="{{ asset('img/logo-sans-font.png') }}" alt="Logo" class="logo">
+            <h5 class="modal--title">{% block modal_title %}{% endblock %}</h5>
+            <button type="button" class="modal--close custom-close-btn">&times;</button>
+        </div>
+        <div class="modal--body">
+            <div class="modal--flash">
+                {% block modal_message_flash %}{% endblock %}
+            </div>
+            <div class="content-modal">
+                {% block modal_content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
