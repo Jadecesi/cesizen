@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
@@ -20,36 +21,32 @@ use Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator;
 
 class SecurityController extends AbstractController
 {
-    #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
+    #[Route(path: '/login', name: 'app_login', methods: ['GET', 'POST'])]
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        if ($this->getUser()) {
-            return $this->redirectToRoute('app_home');
-        }
-
-        $form = $this->createForm(LoginType::class);
-        $form->handleRequest($request);
-
-        // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        if ($error) {
+            dump($error);
+            dump($lastUsername);
+            $this->addFlash('error', 'Identifiants incorrects.');
+        }
+
         return $this->render('security/login.html.twig', [
-            'form' => $form->createView(),
-            'last_username' => $lastUsername,
-            'error' => $error,
+            'last_username' => $lastUsername
         ]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
-    public function logout(): void
+    public function logout()
     {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        throw new \Exception('Don\'t forget to activate logout in security.yaml');
     }
 
+
     #[Route(path: '/signup', name: 'app_signup')]
-    public function signup(Request $request, EntityManagerInterface $entityManager, RoleRepository $roleRepository, UserAuthenticatorInterface $userAuthenticator, AuthentificationAuthenticator $authenticator, UtilisateurRepository $utilisateurRepository): Response
+    public function signup(Request $request, EntityManagerInterface $entityManager, RoleRepository $roleRepository, UserAuthenticatorInterface $userAuthenticator, AuthentificationAuthenticator $authenticator, UtilisateurRepository $utilisateurRepository, UserPasswordHasherInterface $userPasswordHasher): Response
     {
         $form = $this->createForm(SignupType::class);
         $form->handleRequest($request);
@@ -83,7 +80,7 @@ class SecurityController extends AbstractController
             $utilisateur->setUsername($user['username']);
             $utilisateur->setEmail($user['email']);
             $utilisateur->setDateNaissance($user['dateNaissance']);
-            $utilisateur->setPassword($user['confirmPassword']);
+            $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $user['password']));
             $utilisateur->setRole($role);
 
             $entityManager->persist($utilisateur);
