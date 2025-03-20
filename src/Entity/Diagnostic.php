@@ -37,6 +37,7 @@ class Diagnostic
     public function __construct()
     {
         $this->reponses = new ArrayCollection();
+        $this->dateCreation = new \DateTime();
     }
 
     public function getId(): ?int
@@ -110,5 +111,47 @@ class Diagnostic
         }
 
         return $this;
+    }
+
+    public function getCommentaire(int $totalStress): ?string
+    {
+        $commentaire = '';
+
+        if ($totalStress >= 300) {
+            $commentaire .= '<div class="stress-score-container high-stress">
+                        <h2>Plus de 300 points : Stress très élevé</h2>
+                        <p><strong>Risque évalué à 80 %</strong></p>
+                        <p>
+                            Si votre score de stress vécu au cours des 24 derniers mois dépasse <strong>300</strong>,
+                            vos risques de présenter dans un avenir proche une maladie somatique sont <strong>très élevés</strong>.
+                        </p>
+                        <p>
+                            Un score de <strong>300 et plus</strong> suppose que vous avez eu à traverser une série de situations particulièrement pénibles et éprouvantes.
+                            Ne craignez donc pas de vous faire aider si c\'est votre cas.
+                        </p>';
+        } elseif ($totalStress >= 100 && $totalStress < 300) {
+            $commentaire .= '<div class="stress-score-container medium-stress">
+                        <h2>Entre 100 et 300 points : Stress élevé</h2>
+                        <p><strong>Risque évalué à 51 %</strong></p>
+                        <p>
+                            Ces risques diminuent en même temps que votre score total. Toutefois, si votre score est compris entre 300 et 100,
+                            les risques qu\'une maladie somatique se déclenche demeurent statistiquement significatifs.
+                        </p>
+                        <p>
+                            Prenez soin de vous. Ce n\'est pas la peine d\'en rajouter.
+                        </p>';
+        } elseif ($totalStress < 100) {
+            $commentaire .= '<div class="stress-score-container low-stress">
+                        <h2>Moins de 100 points : Stress modéré</h2>
+                        <p><strong>Risque évalué à 30 %</strong></p>
+                        <p>
+                            En dessous de 100, le risque se révèle peu important. La somme des stress rencontrés est trop faible
+                            pour ouvrir la voie à une maladie somatique.
+                        </p>';
+        }
+
+        $commentaire .= '</div>';
+
+        return $commentaire;
     }
 }
