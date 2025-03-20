@@ -124,17 +124,19 @@ class CustomModal {
 
             // Check if there are success messages
             const hasSuccess = this.overlay.querySelector('.alert-success');
+            const errorModal = result.includes('Contenu introuvable.');
             console.log('hasSuccess:', hasSuccess);
             if (hasSuccess) {
+                this.setLoading();
                 setTimeout(() => {
                     this.close();
-                    window.location.reload();
                 }, 2000);
             } else if (result.includes('alert-danger')) {
-                console.log('alerte danger');
                 this.setContent(result);
+            } else if (errorModal) {
+                this.setError();
             } else {
-                console.log('No success message found');
+                this.setLoading();
                 setTimeout(() => {
                     this.close();
                     window.location.reload();
