@@ -24,8 +24,6 @@ class UserProvider implements UserProviderInterface
         $user = $userRepository->findOneBy(['email' => $identifier]) ??
             $userRepository->findOneBy(['username' => $identifier]);
 
-        dump($user);
-
         if (!$user) {
             throw new UserNotFoundException(sprintf('Utilisateur "%s" non trouvé.', $identifier));
         }
