@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EventRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
@@ -21,9 +23,16 @@ class Event
     #[ORM\Column]
     private ?int $stress = null;
 
-    #[ORM\ManyToOne(inversedBy: 'events')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Reponse $reponse = null;
+    /**
+     * @var Collection<int, Reponse>
+     */
+    #[ORM\ManyToMany(targetEntity: Reponse::class, mappedBy: 'events')]
+    private Collection $reponses;
+
+    public function __construct()
+    {
+        $this->reponses = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -54,14 +63,29 @@ class Event
         return $this;
     }
 
-    public function getReponse(): ?Reponse
+    /**
+     * @return Collection<int, Reponse>
+     */
+    public function getReponses(): Collection
     {
-        return $this->reponse;
+        return $this->reponses;
     }
 
-    public function setReponse(?Reponse $reponse): static
+    public function addReponse(Reponse $reponse): static
     {
-        $this->reponse = $reponse;
+        if (!$this->reponses->contains($reponse)) {
+            $this->reponses->add($reponse);
+            $reponse->addEvent($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReponse(Reponse $reponse): static
+    {
+        if ($this->reponses->removeElement($reponse)) {
+            $reponse->removeEvent($this);
+        }
 
         return $this;
     }
