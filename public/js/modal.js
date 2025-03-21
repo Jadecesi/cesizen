@@ -125,7 +125,8 @@ class CustomModal {
             // Check if there are success messages
             const hasSuccess = this.overlay.querySelector('.alert-success');
             const errorModal = result.includes('Contenu introuvable.');
-            console.log('hasSuccess:', hasSuccess);
+            const otherModal = this.overlay.querySelector('.modalImbriquer');
+
             if (hasSuccess) {
                 this.setLoading();
                 setTimeout(() => {
@@ -135,7 +136,10 @@ class CustomModal {
                 this.setContent(result);
             } else if (errorModal) {
                 this.setError();
-            } else {
+            } else if (otherModal) {
+                this.setContent(result);
+            }
+            else {
                 this.setLoading();
                 setTimeout(() => {
                     this.close();

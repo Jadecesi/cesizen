@@ -17,7 +17,7 @@ body {
     min-height: 100vh;
 }
 
-header {
+.header-authenticated {
     width: 100%;
     padding: 1rem;
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
@@ -28,7 +28,22 @@ header {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-header img {
+.header-userless {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-authenticated img {
+    height: 50px;
+}
+
+.header-userless img {
     height: 50px;
     margin-left: 50px;
     margin-right: 150px;
@@ -442,3 +457,161 @@ tbody tr:hover {
         max-width: 80%;
     }
 }
+
+/* Contenu principal */
+.dashboard-content {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Titre */
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+/* Section de description */
+.scale-description {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.scale-description ul {
+    list-style: none;
+    padding: 0;
+}
+
+.scale-description li {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+/* Couleurs pour les niveaux de stress */
+.high-stress { color: #d32f2f; font-weight: bold; }
+.medium-stress { color: #e65100; font-weight: bold; }
+.low-stress { color: #2e7d32; font-weight: bold; }
+
+/* Tableau des événements stressants */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+    background: var(--primary-color);
+    color: white;
+}
+
+thead th, tbody td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+tbody tr:nth-child(odd) {
+    background: var(--neutral-color);
+}
+
+/* Bouton pour démarrer le test */
+.start-test {
+    margin-top: 20px;
+}
+
+.new-diagnostic-btn {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-transform: uppercase;
+    transition: background 0.3s, transform 0.2s ease;
+}
+
+.new-diagnostic-btn:hover {
+    background-color: #ffa000;
+    transform: scale(1.05);
+}
+
+/* USER PROFILE */
+/* Conteneur de l'icône et du menu */
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+/* Style de l'icône */
+.user-profile {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Animation sur l'icône */
+.user-profile:hover {
+    transform: scale(1.1);
+}
+
+/* Menu déroulant caché par défaut */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 160px;
+    z-index: 100;
+}
+
+/* Style des liens du dropdown */
+.dropdown-item {
+    display: block;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+}
+
+/* Animation d'affichage */
+.dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

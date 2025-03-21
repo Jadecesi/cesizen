@@ -41,13 +41,44 @@ class DiagnosticController extends AbstractController
         ]);
     }
 
-
-
     #[Route('/new', name: 'app_diagnostic_new', methods: ['GET', 'POST'])]
+    public function newAnonymous(Request $request): Response
+    {
+        $stress = [];
+        $form = $this->createForm(QuestionnaireType::class, ['user' => false]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Calculer le total du stress sans sauvegarder
+            $selectedEvents = $form->get('events')->getData();
+            foreach ($selectedEvents as $event) {
+                $stress[] = $event->getStress();
+            }
+            $totalStress = array_sum($stress);
+
+            $diagnostic = new Diagnostic();
+            $diagnostic->setTotalStress($totalStress);
+
+            // Rediriger vers la page de résultats avec le score
+            return $this->render('Diagnostic/result.html.twig', [
+                'totalStress' => $totalStress,
+                'events' => $selectedEvents,
+                'diagnostic' => $diagnostic,
+            ]);
+        }
+
+        return $this->render('Diagnostic/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+
+
+    #[Route('/new/user', name: 'app_diagnostic_new_user', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $stress = [];
-        $form = $this->createForm(QuestionnaireType::class);
+        $form = $this->createForm(QuestionnaireType::class, ['user' => true]);
         $form->handleRequest($request);
 
         try {
