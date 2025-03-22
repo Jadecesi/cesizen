@@ -615,3 +615,126 @@ tbody tr:nth-child(odd) {
     }
 }
 
+/* PROFILS UTILISATEURS */
+/* Conteneur principal du profil */
+.profile-container {
+    max-width: 85%; /* Augmente la largeur */
+    margin: 40px auto; /* Ajoute plus d'espace autour */
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Effet d'apparition et survol */
+.profile-container:hover {
+    transform: translateY(-5px);
+}
+
+/* Titre */
+.profile-title {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Champs du profil */
+.profile-field {
+    margin-bottom: 20px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels */
+.profile-field label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+/* Champs de saisie */
+.profile-field input {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f9f9f9;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Mode lecture seule */
+.profile-field input:read-only {
+    background: #eee;
+    border: 1px solid #ddd;
+}
+
+/* Effet au focus */
+.profile-field input:focus {
+    background: white;
+    border: 1px solid var(--primary-color);
+    outline: none;
+}
+
+/* Boutons */
+.profile-buttons {
+    display: flex;
+    justify-content: space-evenly; /* Répartition équilibrée */
+}
+
+/* Bouton Modifier */
+.edit-btn {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* Bouton Enregistrer */
+.save-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Effet au survol */
+.button:hover {
+    opacity: 0.85;
+}
+
+/* Masquer le bouton Enregistrer au départ */
+.hidden {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+/* Responsive : Ajustement sur les écrans plus petits */
+@media (max-width: 768px) {
+    .profile-container {
+        max-width: 90%;
+        padding: 20px;
+    }
+
+    .button {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+
+.btn-fermer {
+    background: #656565;
+    color: white;
+}
+
+.btn-fermer:hover {
+    background: #919191;
+    color: white;
+}
+
+.main-content.profile-page {
+    display: block !important; /* Remplace le display:flex */
+}

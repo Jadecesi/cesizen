@@ -1,0 +1,93 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<main class="main-content profile-page">
+    <div class="profile-container">
+        <h2 class="profile-title">
+            {% if app.user.username != null %}
+                {{ app.user.username }}
+            {% else %}
+                {{ app.user.nom }} {{ app.user.prenom }}
+            {% endif %}
+        </h2>
+
+        <!-- Formulaire du profil -->
+        {{ form_start(form, {'attr': {'id': 'profileForm'}}) }}
+        <div class="profile-field">
+            {{ form_label(form.nom) }}
+            {{ form_widget(form.nom) }}
+        </div>
+
+        <div class="profile-field">
+            {{ form_label(form.prenom) }}
+            {{ form_widget(form.prenom) }}
+        </div>
+
+        <div class="profile-field">
+            {{ form_label(form.email) }}
+            {{ form_widget(form.email) }}
+        </div>
+
+        <div class="profile-field">
+            {{ form_label(form.dateNaissance) }}
+            {{ form_widget(form.dateNaissance) }}
+        </div>
+
+        <div class="profile-field">
+            {{ form_label(form.username) }}
+            {{ form_widget(form.username) }}
+        </div>
+
+        <div class="profile-buttons">
+            <a class="button btn-fermer hidden">Annuler</a>
+            <a type="button" id="editButton" class="button edit-btn">Modifier</a>
+            {{ form_widget(form.save) }}
+        </div>
+        {{ form_end(form) }}
+    </div>
+</main>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let editButton = document.getElementById("editButton");
+            let saveButton = document.querySelector(".save-btn");
+            let annulerButton = document.querySelector(".btn-fermer");
+            let inputs = document.querySelectorAll("#profileForm input");
+
+            // Sauvegarder les valeurs initiales
+            let initialValues = {};
+            inputs.forEach(input => initialValues[input.id] = input.value);
+
+            // Activer l'édition des champs
+            editButton.addEventListener("click", function() {
+                inputs.forEach(input => input.removeAttribute("readonly"));
+                editButton.classList.add("hidden");
+                annulerButton.classList.remove('hidden'); // Afficher Annuler
+                saveButton.classList.remove("hidden");
+            });
+
+            // Annuler la modification et restaurer les valeurs initiales
+            annulerButton.addEventListener("click", function() {
+                inputs.forEach(input => {
+                    input.value = initialValues[input.id]; // Restaurer la valeur initiale
+                    input.setAttribute("readonly", true); // Remettre en lecture seule
+                });
+
+                editButton.classList.remove("hidden"); // Réafficher Modifier
+                annulerButton.classList.add('hidden'); // Cacher Annuler
+                saveButton.classList.add("hidden"); // Cacher Enregistrer
+            });
+
+            // Vérification avant soumission
+            document.getElementById("profileForm").addEventListener("submit", function(event) {
+                if (!confirm("Voulez-vous enregistrer les modifications ?")) {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
