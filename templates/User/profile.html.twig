@@ -66,21 +66,7 @@
     <div class="profile-field {% if form.photoProfile.vars.errors|length > 0 %}has-error{% endif %} hidden" id="phtotoProfileHidden">
         {{ form_label(form.photoProfile) }}
         {{ form_widget(form.photoProfile) }}
-
-{#        {% if form.photoProfile.vars.errors|length > 0 %}#}
-{#            <ul class="form-errors">#}
-{#                {% for error in form.photoProfile.vars.errors %}#}
-{#                    <li class="error-message">{{ error.message }}</li>#}
-{#                {% endfor %}#}
-{#            </ul>#}
-{#        {% endif %}#}
     </div>
-
-{#    <div class="profile-field">#}
-{#        {{ form_label(form.existingPhotoProfile) }}#}
-{#        {{ form_widget(form.existingPhotoProfile) }}#}
-{#        {{ form_errors(form.existingPhotoProfile) }}#}
-{#    </div>#}
 
     <div class="profile-buttons">
         <a class="button btn-fermer hidden">Annuler</a>

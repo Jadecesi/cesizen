@@ -32,6 +32,18 @@ class ProfileController extends AbstractController
         if ($form->isSubmitted()) {
             /** @var UploadedFile|null $photoProfile */
             $photoProfile = $form->get('photoProfile')->getData();
+            $nom = $form->get('nom')->getData();
+            $prenom = $form->get('prenom')->getData();
+            $email = $form->get('email')->getData();
+            $dateNaissance = $form->get('dateNaissance')->getData();
+            $username = $form->get('username')->getData();
+
+            $user->setNom($nom);
+            $user->setPrenom($prenom);
+            $user->setEmail($email);
+            $user->setDateNaissance($dateNaissance);
+            $user->setUsername($username);
+
             dump($photoProfile);
 
             $existingPhotoProfile = $user->getPhotoProfile();
@@ -54,7 +66,6 @@ class ProfileController extends AbstractController
                             unlink($oldPath);
                         }
                     }
-
                     $user->setPhotoProfile($newFilename);
                     $entityManager->flush();
                 } catch (FileException $e) {
@@ -64,6 +75,7 @@ class ProfileController extends AbstractController
                     }
                     return $this->redirectToRoute('app_profile');
                 }
+
             }
         }
 
