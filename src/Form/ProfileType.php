@@ -55,8 +55,6 @@ class ProfileType extends AbstractType
                     'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPG ou PNG).',
                 ])
             ],
-            // Ajoutez cette ligne pour ignorer la validation si le champ est vide :
-            'empty_data' => $options['data']?->getPhotoProfile(),
         ]);
 
         $builder->add('save', SubmitType::class, [

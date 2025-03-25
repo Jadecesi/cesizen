@@ -23,11 +23,44 @@
         </div>
         <div class="form-group">
             <label for="password">Mot de passe:</label>
-            <input type="password" id="password" required="required" placeholder="Mot de passe" name="_password" class="form-control">
+            <div class="password-button-visibility">
+                <input type="password" id="password" required="required" placeholder="Mot de passe" name="_password" class="form-control">
+                <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
         </div>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
         <div class="text-center">
             <button type="submit" class="btn btn-success-modal">Se connecter</button>
         </div>
     </form>
+{% endblock %}
+
+{% block js_modal %}
+    <script>
+        function initPasswordToggle() {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const icon = this.querySelector('i');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", initPasswordToggle);
+        document.addEventListener("modalContentLoaded", initPasswordToggle);
+    </script>
 {% endblock %}

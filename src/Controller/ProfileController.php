@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Utilisateur;
 use App\Form\ProfileType;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,6 +18,16 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/profil')]
 class ProfileController extends AbstractController
 {
+    private UtilisateurRepository $utilisateurRepository;
+
+    public function __construct
+    (
+        UtilisateurRepository $utilisateurRepository
+    )
+    {
+        $this->utilisateurRepository = $utilisateurRepository;
+    }
+
     #[Route('/', name: 'app_profile')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function editProfile(
@@ -38,6 +49,16 @@ class ProfileController extends AbstractController
             $dateNaissance = $form->get('dateNaissance')->getData();
             $username = $form->get('username')->getData();
 
+            $emailExiste = $this->utilisateurRepository->findOneBy(['email' => $email]);
+
+            if ($emailExiste) {
+                $this->addFlash('error', 'Cet email est déjà utilisé.');
+
+                return $this->render('User/profile.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
             $user->setNom($nom);
             $user->setPrenom($prenom);
             $user->setEmail($email);
@@ -48,6 +69,10 @@ class ProfileController extends AbstractController
 
             $existingPhotoProfile = $user->getPhotoProfile();
             $uploadDir = $this->getParameter('profile_pictures_directory');
+
+            if ($photoProfile === null) {
+                $entityManager->flush();
+            }
 
             if ($photoProfile instanceof UploadedFile) {
                 $newFilename = uniqid() . '.' . $photoProfile->getClientOriginalExtension();
@@ -75,7 +100,6 @@ class ProfileController extends AbstractController
                     }
                     return $this->redirectToRoute('app_profile');
                 }
-
             }
         }
 
