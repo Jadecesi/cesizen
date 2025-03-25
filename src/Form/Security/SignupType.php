@@ -3,6 +3,7 @@
 namespace App\Form\Security;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -10,6 +11,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class SignupType extends AbstractType
 {
@@ -77,6 +80,43 @@ class SignupType extends AbstractType
                 ],
                 'required' => true
             ]);
+
+        $builder->add('defaultProfilePicture', ChoiceType::class, [
+            'label' => 'Choisissez une photo de profil par défaut',
+            'mapped' => false,
+            'required' => false,
+            'choices' => [
+                'Avatar 1' => 'profilePicture1.png',
+                'Avatar 2' => 'profilePicture2.png',
+                'Avatar 3' => 'profilePicture3.png',
+                'Avatar 4' => 'profilePicture4.png',
+                'Avatar 5' => 'profilePicture5.png',
+                'Avatar 6' => 'profilePicture6.png',
+                'Avatar 7' => 'profilePicture7.png',
+                'Avatar 8' => 'profilePicture8.png',
+                'Avatar 9' => 'profilePicture9.png',
+                'Avatar 10' => 'profilePicture10.png',
+            ],
+            'expanded' => true,
+            'multiple' => false,
+            'placeholder' => false,
+            'choice_attr' => function($choice, $key, $value) {
+                return ['data-img' => '' . $value];
+            }
+        ]);
+
+        $builder->add('profilePicture', FileType::class, [
+            'label' => 'Photo de profil',
+            'mapped' => false,
+            'required' => false,
+            'constraints' => [
+                new File([
+                    'maxSize' => '2M',
+                    'mimeTypes' => ['image/jpeg', 'image/png'],
+                    'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPG ou PNG).'
+                ])
+            ],
+        ]);
 
         $builder->add('submit', SubmitType::class,
             [

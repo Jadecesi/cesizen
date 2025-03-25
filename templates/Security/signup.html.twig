@@ -27,6 +27,17 @@
         {{ form_row(form.email) }}
         {{ form_row(form.password) }}
         {{ form_row(form.confirmPassword) }}
+        <h3>Choisir une photo de profil</h3>
+        <div class="profile-selection">
+            {% for choice in form.defaultProfilePicture %}
+                <label class="profile-choice">
+                    {{ form_widget(choice) }} {# Affiche le bouton radio #}
+                    <img src="{{ asset('uploads/profiles/' ~ choice.vars.value) }}" class="profile-image" alt="Avatar">
+                </label>
+            {% endfor %}
+        </div>
+        <p>Ou télécharger votre propre photo</p>
+        {{ form_row(form.profilePicture) }}
         <div class="modal--actions">
             {{ form_label(form.submit) }}
             {{ form_widget(form.submit) }}

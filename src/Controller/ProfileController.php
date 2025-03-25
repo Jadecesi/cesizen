@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
+use App\Entity\Utilisateur;
 use App\Form\ProfileType;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -16,29 +19,56 @@ class ProfileController extends AbstractController
 {
     #[Route('/', name: 'app_profile')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function index(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        // Récupération de l'utilisateur connecté
+    public function editProfile(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        LoggerInterface $logger
+    ): Response {
+        /** @var Utilisateur $user */
         $user = $this->getUser();
-
-        // Création du formulaire basé sur l'entité User
         $form = $this->createForm(ProfileType::class, $user);
         $form->handleRequest($request);
 
-        // Vérifie si le formulaire est soumis et valide
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($user);
-            $entityManager->flush();
+        if ($form->isSubmitted()) {
+            /** @var UploadedFile|null $photoProfile */
+            $photoProfile = $form->get('photoProfile')->getData();
+            dump($photoProfile);
 
-            // Message de confirmation
-            $this->addFlash('success', 'Profil mis à jour avec succès !');
+            $existingPhotoProfile = $user->getPhotoProfile();
+            $uploadDir = $this->getParameter('profile_pictures_directory');
 
-            return $this->redirectToRoute('app_profile');
+            if ($photoProfile instanceof UploadedFile) {
+                $newFilename = uniqid() . '.' . $photoProfile->getClientOriginalExtension();
+
+                try {
+                    // Déplacement du fichier d'abord
+                    $photoProfile->move(
+                        $this->getParameter('profile_pictures_directory'),
+                        $newFilename
+                    );
+
+                    // Si le déplacement réussit, on supprime l'ancienne photo
+                    if (!empty($existingPhotoProfile)) {
+                        $oldPath = $uploadDir . '/' . $existingPhotoProfile;
+                        if (file_exists($oldPath)) {
+                            unlink($oldPath);
+                        }
+                    }
+
+                    $user->setPhotoProfile($newFilename);
+                    $entityManager->flush();
+                } catch (FileException $e) {
+                    $logger->error('Erreur upload : ' . $e->getMessage());
+                    foreach ($form->getErrors(true) as $error) {
+                        $this->addFlash('error', $error->getMessage());
+                    }
+                    return $this->redirectToRoute('app_profile');
+                }
+            }
         }
 
         return $this->render('User/profile.html.twig', [
             'form' => $form->createView(),
-            'user' => $user
         ]);
     }
 }

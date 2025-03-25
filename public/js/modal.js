@@ -7,7 +7,7 @@ class CustomModal {
 
     init() {
         document.querySelectorAll('a[data-target="modal"]').forEach(link =>
-            link.addEventListener('click', (e) => this.handleClick(e))
+            link.addEventListener('click', this.handleClick) // ✅ `this` est déjà lié grâce à la fonction fléchée
         );
     }
 
@@ -22,6 +22,7 @@ class CustomModal {
             <div class="modal--content">
                 <button class="modal--close">&times;</button>
                 <div class="modal--body">Chargement...</div>
+                <div class="modal--script-container"></div> <!-- Ajout d’un conteneur pour les scripts -->
             </div>
         `;
         document.body.appendChild(overlay);
@@ -32,11 +33,13 @@ class CustomModal {
         return this.overlay.querySelector('.modal--content');
     }
 
-    async handleClick(e) {
+    handleClick = async (e) => {
         if (e.defaultPrevented) return;
         e.preventDefault();
+        console.log("Valeur de `this` dans handleClick :", this); // 🔍 Vérifier ce que `this` contient
         await this.loadContentInModal(e.target.getAttribute('href'));
-    }
+    };
+
 
     async loadContentInModal(url) {
         this.showModal();
@@ -49,6 +52,12 @@ class CustomModal {
             const content = await response.text();
             this.setContent(content);
             this.attachEvents();
+
+            // Charge les scripts spécifiques du modal
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            this.loadModalScripts(tempDiv.querySelectorAll("script")); // ✅ Correction ici
+
         } catch (error) {
             this.setError();
             console.error(error);
@@ -72,8 +81,9 @@ class CustomModal {
         const newTitle = tempDiv.querySelector('.modal--title')?.innerText || "Chargement...";
         const newBody = tempDiv.querySelector('.content-modal')?.innerHTML || "<p>Contenu introuvable.</p>";
         const newFlash = tempDiv.querySelector('.modal--flash')?.innerHTML || "";
+        const newScripts = tempDiv.querySelectorAll("script");
 
-        // Update flash messages
+        // Mettre à jour le contenu du modal
         const flashContainer = this.overlay.querySelector('.modal--flash');
         if (flashContainer) {
             flashContainer.innerHTML = newFlash;
@@ -81,13 +91,20 @@ class CustomModal {
         this.overlay.querySelector('.modal--body').innerHTML = `
         <div class="modal--flash">${flashContainer ? flashContainer.innerHTML : ''}</div>
         <div class="content-modal">${newBody}</div>
-        `;
+    `;
 
         const modalTitle = this.overlay.querySelector('.modal--title');
         if (modalTitle) modalTitle.innerHTML = newTitle;
 
         this.attachFormEvents();
+
+        // Charger les scripts spécifiques au modal
+        this.loadModalScripts(newScripts);
+
+        // 🚀 Déclencher un événement pour signaler que le contenu du modal est chargé
+        document.dispatchEvent(new Event("modalContentLoaded"));
     }
+
 
     attachEvents() {
         this.overlay.querySelector('.modal--close').addEventListener('click', () => this.close());
@@ -120,12 +137,19 @@ class CustomModal {
             const result = await response.text();
 
             console.log(result);
+
             this.setContent(result);
 
-            // Check if there are success messages
             const hasSuccess = this.overlay.querySelector('.alert-success');
-            const errorModal = result.includes('Contenu introuvable.');
+            const errorModal = result.includes('Contenu introuvable.') || result.includes('exception occurred');
             const otherModal = this.overlay.querySelector('.modalImbriquer');
+
+            // 🔍 Vérifier si la réponse contient des erreurs
+            if (result.includes('class="form-errors"') || result.includes('alert-danger')) {
+                console.warn("Erreur détectée dans le formulaire !");
+                this.setContent(result); // Recharge le modal avec le contenu mis à jour
+                return;
+            }
 
             if (hasSuccess) {
                 this.setLoading();
@@ -160,6 +184,24 @@ class CustomModal {
     close() {
         this.overlay.style.display = 'none';
         this.overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    // Charger et exécuter les scripts spécifiques au modal
+    loadModalScripts(scripts) {
+        const scriptContainer = this.overlay.querySelector('.modal--script-container');
+        scriptContainer.innerHTML = '';
+
+        scripts.forEach(script => {
+            const newScript = document.createElement('script');
+            if (script.src) {
+                newScript.src = script.src;
+                newScript.defer = true;
+            } else {
+                newScript.textContent = script.textContent;
+            }
+            scriptContainer.appendChild(newScript);
+        });
+
     }
 }
 

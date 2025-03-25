@@ -1,93 +1,171 @@
-{% extends 'base.html.twig' %}
+{% extends 'modalBase.html.twig' %}
 
-{% block body %}
-<main class="main-content profile-page">
-    <div class="profile-container">
-        <h2 class="profile-title">
-            {% if app.user.username != null %}
-                {{ app.user.username }}
-            {% else %}
-                {{ app.user.nom }} {{ app.user.prenom }}
-            {% endif %}
-        </h2>
+{% block modal_title %}{{ app.user.username ?: app.user.nom ~ ' ' ~ app.user.prenom }}{% endblock %}
 
-        <!-- Formulaire du profil -->
-        {{ form_start(form, {'attr': {'id': 'profileForm'}}) }}
-        <div class="profile-field">
-            {{ form_label(form.nom) }}
-            {{ form_widget(form.nom) }}
+{% block modal_message_flash %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
         </div>
-
-        <div class="profile-field">
-            {{ form_label(form.prenom) }}
-            {{ form_widget(form.prenom) }}
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
         </div>
-
-        <div class="profile-field">
-            {{ form_label(form.email) }}
-            {{ form_widget(form.email) }}
-        </div>
-
-        <div class="profile-field">
-            {{ form_label(form.dateNaissance) }}
-            {{ form_widget(form.dateNaissance) }}
-        </div>
-
-        <div class="profile-field">
-            {{ form_label(form.username) }}
-            {{ form_widget(form.username) }}
-        </div>
-
-        <div class="profile-buttons">
-            <a class="button btn-fermer hidden">Annuler</a>
-            <a type="button" id="editButton" class="button edit-btn">Modifier</a>
-            {{ form_widget(form.save) }}
-        </div>
-        {{ form_end(form) }}
-    </div>
-</main>
+    {% endfor %}
 {% endblock %}
 
 
-{% block js %}
+{% block modal_content %}
+    <div class="profile-picture">
+        {% if app.user.photoProfile %}
+            <img src="{{ asset('uploads/profiles/' ~ app.user.photoProfile) }}" alt="Photo de profil">
+        {% else %}
+            <img src="{{ asset('images/profilePicture1.png') }}" alt="Photo par défaut">
+        {% endif %}
+    </div>
+
+    {{ form_start(form, {
+        'attr': {
+            'id': 'profileForm',
+            'enctype': 'multipart/form-data'
+        },
+        'action': path('app_profile')
+    }) }}
+
+    <div class="profile-field">
+        {{ form_label(form.nom) }}
+        {{ form_widget(form.nom) }}
+        {{ form_errors(form.nom) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.prenom) }}
+        {{ form_widget(form.prenom) }}
+        {{ form_errors(form.prenom) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {{ form_errors(form.email) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.dateNaissance) }}
+        {{ form_widget(form.dateNaissance) }}
+        {{ form_errors(form.dateNaissance) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.username) }}
+        {{ form_widget(form.username) }}
+        {{ form_errors(form.username) }}
+    </div>
+
+    <div class="profile-field {% if form.photoProfile.vars.errors|length > 0 %}has-error{% endif %} hidden" id="phtotoProfileHidden">
+        {{ form_label(form.photoProfile) }}
+        {{ form_widget(form.photoProfile) }}
+
+{#        {% if form.photoProfile.vars.errors|length > 0 %}#}
+{#            <ul class="form-errors">#}
+{#                {% for error in form.photoProfile.vars.errors %}#}
+{#                    <li class="error-message">{{ error.message }}</li>#}
+{#                {% endfor %}#}
+{#            </ul>#}
+{#        {% endif %}#}
+    </div>
+
+{#    <div class="profile-field">#}
+{#        {{ form_label(form.existingPhotoProfile) }}#}
+{#        {{ form_widget(form.existingPhotoProfile) }}#}
+{#        {{ form_errors(form.existingPhotoProfile) }}#}
+{#    </div>#}
+
+    <div class="profile-buttons">
+        <a class="button btn-fermer hidden">Annuler</a>
+        <a type="button" id="editButton" class="button edit-btn">Modifier</a>
+        {{ form_widget(form.save, {'attr': {'class': 'button save-btn hidden'}}) }}
+    </div>
+
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block js_modal %}
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        function initProfileModal() {
+            console.log("Initialisation du modal Profile...");
+
             let editButton = document.getElementById("editButton");
             let saveButton = document.querySelector(".save-btn");
             let annulerButton = document.querySelector(".btn-fermer");
             let inputs = document.querySelectorAll("#profileForm input");
+            let inputChamps = document.querySelector('#phtotoProfileHidden');
+            let errorMessages = document.querySelectorAll(".form-errors li");
 
-            // Sauvegarder les valeurs initiales
+            if (!editButton) {
+                console.error("Le bouton Modifier n'existe pas !");
+                return;
+            }
+
+            // Sauvegarde des valeurs initiales
             let initialValues = {};
             inputs.forEach(input => initialValues[input.id] = input.value);
 
-            // Activer l'édition des champs
-            editButton.addEventListener("click", function() {
+            // Suppression des anciens événements pour éviter les doublons
+            editButton.removeEventListener("click", enableEditing);
+            annulerButton.removeEventListener("click", cancelEditing);
+
+            // Ajout des événements
+            editButton.addEventListener("click", enableEditing);
+            annulerButton.addEventListener("click", cancelEditing);
+
+            function enableEditing() {
+                console.log("Mode édition activé !");
                 inputs.forEach(input => input.removeAttribute("readonly"));
                 editButton.classList.add("hidden");
-                annulerButton.classList.remove('hidden'); // Afficher Annuler
+                annulerButton.classList.remove("hidden");
                 saveButton.classList.remove("hidden");
-            });
+                inputChamps.classList.remove("hidden");
+            }
 
-            // Annuler la modification et restaurer les valeurs initiales
-            annulerButton.addEventListener("click", function() {
+            function cancelEditing() {
+                console.log("Modification annulée !");
                 inputs.forEach(input => {
-                    input.value = initialValues[input.id]; // Restaurer la valeur initiale
-                    input.setAttribute("readonly", true); // Remettre en lecture seule
+                    input.value = initialValues[input.id];
+                    input.setAttribute("readonly", true);
                 });
 
-                editButton.classList.remove("hidden"); // Réafficher Modifier
-                annulerButton.classList.add('hidden'); // Cacher Annuler
-                saveButton.classList.add("hidden"); // Cacher Enregistrer
-            });
+                editButton.classList.remove("hidden");
+                annulerButton.classList.add("hidden");
+                saveButton.classList.add("hidden");
+                inputChamps.classList.add("hidden");
+            }
 
-            // Vérification avant soumission
-            document.getElementById("profileForm").addEventListener("submit", function(event) {
-                if (!confirm("Voulez-vous enregistrer les modifications ?")) {
-                    event.preventDefault();
-                }
-            });
+            // ✅ Afficher les boutons si une erreur existe déjà dans le formulaire
+            if (errorMessages.length > 0) {
+                console.warn("Des erreurs sont présentes, affichage des boutons !");
+                editButton.classList.add("hidden");
+                annulerButton.classList.remove("hidden");
+                saveButton.classList.remove("hidden");
+                inputChamps.classList.remove("hidden");
+            }
+        }
+
+        // Exécuter la fonction après le chargement du modal
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(initProfileModal, 500);
+        });
+
+        // Exécuter la fonction après chaque ouverture du modal
+        document.addEventListener("modalContentLoaded", function() {
+            initProfileModal();
         });
     </script>
 {% endblock %}
+
+
+
+
+
 
