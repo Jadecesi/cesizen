@@ -140,7 +140,7 @@ class CustomModal {
 
             this.setContent(result);
 
-            const hasSuccess = this.overlay.querySelector('.alert-success');
+            const hasSuccess = result.includes('alert-success');
             const errorModal = result.includes('Contenu introuvable.') || result.includes('exception occurred');
             const otherModal = this.overlay.querySelector('.modalImbriquer');
 
@@ -148,13 +148,15 @@ class CustomModal {
             if (result.includes('class="form-errors"') || result.includes('alert-danger')) {
                 console.warn("Erreur détectée dans le formulaire !");
                 this.setContent(result); // Recharge le modal avec le contenu mis à jour
-                return;
+                // return;
             }
+            console.log(hasSuccess);
 
             if (hasSuccess) {
                 this.setLoading();
                 setTimeout(() => {
                     this.close();
+                    window.location.reload();
                 }, 2000);
             } else if (result.includes('alert-danger')) {
                 this.setContent(result);

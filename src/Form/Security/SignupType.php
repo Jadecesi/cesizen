@@ -95,7 +95,6 @@ class SignupType extends AbstractType
                 'Avatar 7' => 'profilePicture7.png',
                 'Avatar 8' => 'profilePicture8.png',
                 'Avatar 9' => 'profilePicture9.png',
-                'Avatar 10' => 'profilePicture10.png',
             ],
             'expanded' => true,
             'multiple' => false,

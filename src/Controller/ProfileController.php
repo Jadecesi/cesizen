@@ -49,14 +49,17 @@ class ProfileController extends AbstractController
             $dateNaissance = $form->get('dateNaissance')->getData();
             $username = $form->get('username')->getData();
 
-            $emailExiste = $this->utilisateurRepository->findOneBy(['email' => $email]);
+            if ($email !== $user->getEmail()) {
+                dump('email différent de selui de l\'utilisateur');
+                $emailExiste = $this->utilisateurRepository->findOneBy(['email' => $email]);
 
-            if ($emailExiste) {
-                $this->addFlash('error', 'Cet email est déjà utilisé.');
+                if ($emailExiste) {
+                    $this->addFlash('error', 'Cet email est déjà utilisé.');
 
-                return $this->render('User/profile.html.twig', [
-                    'form' => $form->createView(),
-                ]);
+                    return $this->render('User/profile.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
+                }
             }
 
             $user->setNom($nom);
@@ -65,13 +68,18 @@ class ProfileController extends AbstractController
             $user->setDateNaissance($dateNaissance);
             $user->setUsername($username);
 
-            dump($photoProfile);
+
 
             $existingPhotoProfile = $user->getPhotoProfile();
             $uploadDir = $this->getParameter('profile_pictures_directory');
 
             if ($photoProfile === null) {
+                $this->addFlash('success', "Utilisateur à était modifiés avec succès.");
                 $entityManager->flush();
+
+                return $this->render('User/profile.html.twig', [
+                    'form' => $form->createView(),
+                ]);
             }
 
             if ($photoProfile instanceof UploadedFile) {
@@ -84,15 +92,20 @@ class ProfileController extends AbstractController
                         $newFilename
                     );
 
+                    $isExistePhotoDefault = str_contains($existingPhotoProfile, 'profilePicture');
+
                     // Si le déplacement réussit, on supprime l'ancienne photo
-                    if (!empty($existingPhotoProfile)) {
+                    if (!empty($existingPhotoProfile) && $isExistePhotoDefault === false) {
                         $oldPath = $uploadDir . '/' . $existingPhotoProfile;
                         if (file_exists($oldPath)) {
+                            dump('supprimer la phtoto');
                             unlink($oldPath);
                         }
                     }
+
                     $user->setPhotoProfile($newFilename);
                     $entityManager->flush();
+                    $this->addFlash('success', "Utilisateur et la phtoto de profil modifiés avec succès.");
                 } catch (FileException $e) {
                     $logger->error('Erreur upload : ' . $e->getMessage());
                     foreach ($form->getErrors(true) as $error) {
