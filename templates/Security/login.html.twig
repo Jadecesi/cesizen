@@ -22,12 +22,14 @@
             <input type="text" id="username" required="required" name="_username" placeholder="Email ou Nom d'utilisateur" value="{{ last_username }}" class="form-control">
         </div>
         <div class="form-group">
-            <label for="password">Mot de passe:</label>
-            <div class="password-button-visibility">
-                <input type="password" id="password" required="required" placeholder="Mot de passe" name="_password" class="form-control">
-                <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
-                    <i class="fas fa-eye"></i>
-                </button>
+            <div class="profile-field">
+                <label for="password">Mot de passe:</label>
+                <div class="password-container">
+                    <input type="password" id="password" required="required" placeholder="Mot de passe" name="_password" class="form-control">
+                    <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
         </div>
         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">

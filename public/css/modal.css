@@ -188,7 +188,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 input:required, select:required, textarea:required {
-    border-left: 4px solid var(--accent-color); /* Ajoute un indicateur visuel */
+    border-left: 4px solid var(--accent-color) !important;
 }
 
 .flash-success {
@@ -271,6 +271,50 @@ input:required, select:required, textarea:required {
     justify-content: center;
 }
 
+.password-container input {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f9f9f9;
+    transition: all 0.3s ease-in-out;
+    height: 46px; /* Assure une hauteur consistante */
+}
 
+.password-container {
+    display: flex;
+    align-items: center;
+    height: 46px; /* Même hauteur que les autres champs */
+}
 
+.toggle-password {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+.password-container input:required {
+    border-left: 4px solid var(--accent-color);
+}
+
+/* Style commun pour tous les champs de formulaire */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+.form-control {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f9f9f9;
+    transition: all 0.3s ease-in-out;
+    height: 46px;
+    box-sizing: border-box;
+}
 
