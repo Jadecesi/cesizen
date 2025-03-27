@@ -242,23 +242,6 @@ input:required, select:required, textarea:required {
     margin-bottom: 10px;
 }
 
-/*!* --- BOUTON DE FERMETURE --- *!*/
-/*.modal--close {*/
-/*    position: absolute;*/
-/*    top: 10px;*/
-/*    right: 15px;*/
-/*    font-size: 24px;*/
-/*    font-weight: bold;*/
-/*    background: none;*/
-/*    border: none;*/
-/*    cursor: pointer;*/
-/*    transition: color 0.3s ease;*/
-/*}*/
-
-/*.modal--close:hover {*/
-/*    color: red;*/
-/*}*/
-
 /* --- CONTENU DE LA MODAL --- */
 .modal--body {
     max-height: 600px; /* Augmenté de 400px à 600px */
@@ -318,3 +301,44 @@ input[type="date"],
     box-sizing: border-box;
 }
 
+
+/* Zone de checkbox améliorée */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #f9f9f9;
+    transition: background 0.3s ease;
+}
+
+.checkbox-container:hover {
+    background: #f1f1f1;
+}
+
+/* Label plus lisible */
+.checkbox-container label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-color);
+    flex-grow: 1;
+}
+
+/* Case à cocher améliorée */
+.checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-color);
+}
+
+/* Bouton centré et stylisé */
+.form-container div[style*="justify-content: center"] {
+    margin-top: 20px;
+}
+
+
+.form-container button:hover,
+.form-container input[type="submit"]:hover {
+    transform: scale(1.05);
+}

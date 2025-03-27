@@ -27,14 +27,14 @@ class QuestionnaireType extends AbstractType
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Valider',
                 'attr' => [
-                    'class' => 'button'
+                    'class' => 'button btn-success-modal'
                 ]
             ]);
         } else {
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Valider',
                 'attr' => [
-                    'class' => 'button modalImbriquer',
+                    'class' => 'button btn-success-modal modalImbriquer ',
                     'data-target' => 'modal'
                 ]
             ])
