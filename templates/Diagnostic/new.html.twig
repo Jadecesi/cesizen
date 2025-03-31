@@ -17,7 +17,17 @@
 
 {% block modal_content %}
     <div class="form-container">
-        {{ form_start(form, {'action': path('app_diagnostic_new')}) }}
+        {%  if app.user is not null %}
+            {{ form_start(form, {
+                'action': action,
+                'attr': {
+                    'data-redirect': path('app_diagnostic_dashboard')
+                }
+            }) }}
+        {% else %}
+            {{ form_start(form, {'action': path('app_diagnostic_new')}) }}
+        {%  endif %}
+
         {{ form_label(form.events) }}
         {% for child in form.events %}
             <div class="checkbox-container">

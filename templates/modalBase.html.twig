@@ -1,4 +1,4 @@
-<div class="modal--overlay" aria-hidden="true">
+<div class="modal--overlay"  aria-hidden="true">
     <div class="modal--content">
         <div class="modal--header">
             <img src="{{ asset('img/logo-sans-font.png') }}" alt="Logo" class="logo">
@@ -13,5 +13,6 @@
                 {% block modal_content %}{% endblock %}
             </div>
         </div>
+        <div class="modal--script-container">{% block js_modal %}{% endblock %}</div>
     </div>
 </div>

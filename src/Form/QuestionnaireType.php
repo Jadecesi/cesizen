@@ -13,26 +13,42 @@ class QuestionnaireType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder
-            ->add('events', EntityType::class, [
+        $user = $options['user'];
+
+        $builder->add('events', EntityType::class, [
                 'label' => 'Sélectionnez les événements',
                 'class' => Event::class,
                 'choice_label' => 'nom',
                 'multiple' => true,
                 'expanded' => true,
                 'required' => true,
-            ])
-            ->add('submit', SubmitType::class, [
+            ]);
+        if ($user) {
+            dump('ici', $user);
+            $builder->add('submit', SubmitType::class, [
                 'label' => 'Valider',
-                'attr' => ['class' => 'button']
+                'attr' => [
+                    'class' => 'button btn-success-modal modalRedirect',
+                ]
+            ]);
+        } else {
+            dump('la', $user);
+            $builder->add('submit', SubmitType::class, [
+                'label' => 'Valider',
+                'attr' => [
+                    'class' => 'button btn-success-modal modalImbriquer ',
+                    'data-target' => 'modal'
+                ]
             ])
-        ;
+            ;
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => null
+            'data_class' => null,
+            'user' => false
         ]);
     }
 }

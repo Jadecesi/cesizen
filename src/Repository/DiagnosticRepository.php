@@ -22,6 +22,7 @@ class DiagnosticRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('d')
             ->join('d.utilisateur', 'u')
             ->where('u.id = :userId')
+            ->orderBy('d.dateCreation', 'DESC')
             ->setParameter('userId', $user->getId())
             ->getQuery()
             ->getResult();

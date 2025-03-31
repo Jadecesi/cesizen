@@ -52,6 +52,16 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $username = null;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    #[Assert\File(
+        maxSize: "2M",
+        maxSizeMessage: "Le fichier est trop volumineux. La taille maximale autorisée est 2 Mo.",
+        mimeTypes: ["image/jpeg", "image/png"],
+        mimeTypesMessage: "Veuillez télécharger une image valide (JPG ou PNG).",
+        notFoundMessage: "Le fichier n'a pas pu être trouvé."
+    )]
+    private ?string $photoProfile = null;
+
     public function __construct()
     {
         $this->diagnostics = new ArrayCollection();
@@ -202,6 +212,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(?string $username): static
     {
         $this->username = $username;
+
+        return $this;
+    }
+
+    public function getPhotoProfile(): ?string
+    {
+        return $this->photoProfile;
+    }
+
+    public function setPhotoProfile(?string $photoProfile): self
+    {
+        $this->photoProfile = $photoProfile;
 
         return $this;
     }

@@ -17,7 +17,7 @@ body {
     min-height: 100vh;
 }
 
-header {
+.header-authenticated {
     width: 100%;
     padding: 1rem;
     background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
@@ -28,7 +28,22 @@ header {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-header img {
+.header-userless {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-authenticated img {
+    height: 50px;
+}
+
+.header-userless img {
     height: 50px;
     margin-left: 50px;
     margin-right: 150px;
@@ -87,7 +102,7 @@ a {
     color: white;
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s;
@@ -441,4 +456,498 @@ tbody tr:hover {
         font-size: 14px;
         max-width: 80%;
     }
+}
+
+/* Contenu principal */
+.dashboard-content {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Titre */
+.diagnostic-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-color);
+    margin-bottom: 20px;
+}
+
+/* Section de description */
+.scale-description {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.scale-description ul {
+    list-style: none;
+    padding: 0;
+}
+
+.scale-description li {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+/* Couleurs pour les niveaux de stress */
+.high-stress { color: #d32f2f; font-weight: bold; }
+.medium-stress { color: #e65100; font-weight: bold; }
+.low-stress { color: #2e7d32; font-weight: bold; }
+
+/* Tableau des événements stressants */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+    background: var(--primary-color);
+    color: white;
+}
+
+thead th, tbody td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+tbody tr:nth-child(odd) {
+    background: var(--neutral-color);
+}
+
+/* Bouton pour démarrer le test */
+.start-test {
+    margin-top: 20px;
+}
+
+.new-diagnostic-btn {
+    background-color: var(--accent-color);
+    color: white;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-transform: uppercase;
+    transition: background 0.3s, transform 0.2s ease;
+}
+
+.new-diagnostic-btn:hover {
+    background-color: #ffa000;
+    transform: scale(1.05);
+}
+
+/* USER PROFILE */
+/* Conteneur de l'icône et du menu */
+.user-menu {
+    position: relative;
+    display: inline-block;
+}
+
+/* Style de l'icône */
+.user-profile {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Animation sur l'icône */
+.user-profile:hover {
+    transform: scale(1.1);
+}
+
+/* Menu déroulant caché par défaut */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 160px;
+    z-index: 100;
+}
+
+/* Style des liens du dropdown */
+.dropdown-item {
+    display: block;
+    padding: 12px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background: #f5f5f5;
+}
+
+/* Animation d'affichage */
+.dropdown-menu.show {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* PROFILS UTILISATEURS */
+/* Conteneur principal du profil */
+.profile-container {
+    max-width: 85%; /* Augmente la largeur */
+    margin: 40px auto; /* Ajoute plus d'espace autour */
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Effet d'apparition et survol */
+.profile-container:hover {
+    transform: translateY(-5px);
+}
+
+/* Titre */
+.profile-title {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+/* Champs du profil */
+.profile-field {
+    margin-bottom: 5px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Labels */
+.profile-field label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+/* Champs de saisie */
+.profile-field input {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f9f9f9;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Mode lecture seule */
+.profile-field input:read-only {
+    background: #eee;
+    border: 1px solid #ddd;
+}
+
+/* Effet au focus */
+.profile-field input:focus {
+    background: white;
+    border: 1px solid var(--primary-color);
+    outline: none;
+}
+
+/* Boutons */
+.profile-buttons {
+    display: flex;
+    justify-content: space-evenly; /* Répartition équilibrée */
+}
+
+/* Bouton Modifier */
+.edit-btn {
+    background: var(--accent-color);
+    color: white;
+}
+
+/* Bouton Enregistrer */
+.save-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Effet au survol */
+.button:hover {
+    opacity: 0.85;
+}
+
+/* Masquer le bouton Enregistrer au départ */
+.hidden {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+/* Conteneur de la photo */
+.profile-picture {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-picture img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+/* Responsive : Ajustement sur les écrans plus petits */
+@media (max-width: 768px) {
+    .profile-container {
+        max-width: 90%;
+        padding: 20px;
+    }
+
+    .button {
+        font-size: 16px;
+        padding: 12px;
+    }
+}
+
+.btn-fermer {
+    background: #656565;
+    color: white;
+}
+
+.btn-fermer:hover {
+    background: #919191;
+    color: white;
+}
+
+.main-content.profile-page {
+    display: block !important; /* Remplace le display:flex */
+}
+
+/* Conteneur des choix */
+.profile-selection {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Masquer les labels textuels Symfony */
+.profile-choice input[type="radio"] + span {
+    display: none;
+}
+
+/* Masquer les boutons radio */
+.profile-choice input[type="radio"] {
+    display: none;
+}
+
+/* Style des images */
+.profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.3s;
+}
+
+/* Effet au survol */
+.profile-image:hover {
+    transform: scale(1.1);
+}
+
+/* Style de la sélection active */
+.profile-choice input[type="radio"]:checked + img {
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+}
+
+/* Conteneur de la photo de profil */
+.profile-picture-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Image de profil */
+.profile-picture img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+/* Bouton pour changer la photo */
+.change-photo-btn {
+    display: block;
+    margin: 10px auto;
+    background: var(--primary-color);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s ease-in-out;
+}
+
+.change-photo-btn:hover {
+    background: #333;
+}
+
+/* Style pour les conteneurs d'erreurs */
+.form-error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Style pour la liste des erreurs */
+.profile-field ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+}
+
+/* Style pour chaque message d'erreur */
+.profile-field li {
+    color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.1);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.25rem;
+}
+
+/* Style pour les champs en erreur */
+.form-error input,
+.form-error select,
+.form-error textarea {
+    border-color: #dc3545;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8%;
+    top: 64%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.toggle-password i {
+    color: #666;
+}
+
+.password-button-visibility {
+    display: flex;
+    justify-content: end;
+}
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    opacity: 0.7;
+}
+
+.toggle-password i {
+    color: #666;
+    font-size: 16px;
+}
+
+/* Style pour le focus */
+.toggle-password:focus {
+    outline: none;
+}
+
+/* Assurer que le bouton ne cache pas le texte */
+.form-control {
+    padding-right: 40px;
+}
+
+.stress-comment {
+    padding: 16px;
+    border-radius: 10px;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin: 10px 0;
+    background: #fffbe6;
+    border-left: 6px solid var(--accent-color);
+    color: #333;
+}
+
+/* Spécifique pour chaque niveau de stress */
+.stress-comment.high-stress {
+    background: #ffecec;
+    border-color: #e53935;
+    color: #c62828;
+}
+
+.stress-comment.medium-stress {
+    background: #fff4e5;
+    border-color: #ff9800;
+    color: #ef6c00;
+}
+
+.stress-comment.low-stress {
+    background: #e8f5e9;
+    border-color: #4caf50;
+    color: #2e7d32;
 }

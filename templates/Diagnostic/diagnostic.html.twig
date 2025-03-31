@@ -2,52 +2,66 @@
 
 {% block body %}
     <div class="dashboard-content">
-        <a href="{{ path('app_diagnostic_new') }}" class="button new-diagnostic-btn" data-target="modal">
-            Démarrer un nouveau test
-        </a>
 
-        {% if app.user %}
-            {% if diagnostics is not empty %}
-                <section class="diagnostic-history">
-                    <h3>Historique des résultats</h3>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Évènement de stress</th>
-                            <th>Score</th>
-                            <th>Commentaires</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for diagnostic in diagnostics %}
-                            <tr>
-                                <td>{{ diagnostic.dateCreation|date('d/m/Y') }}</td>
-                                <td>
-                                    <ul>
-                                        {% for reponse in diagnostic.reponses %}
-                                            {% for event in reponse.events %}
-                                                <li>{{ event.nom }}</li>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </ul>
-                                </td>
-                                <td>{{ diagnostic.totalStress }}</td>
-                                <td>{{ diagnostic.getCommentaire(diagnostic.totalStress)|raw }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </section>
-            {% else %}
-                <div>
-                    <p>Vous n'avez pas encore réalisé de diagnostic</p>
-                </div>
-            {% endif %}
-        {% else %}
+        {% if diagnostics is null and app.user is not null %}
             <div>
-                <p>Si vous souhaitez avoir un historique de vos diagnostics, vous devez créer un compte</p>
+                <p>Vous n'avez pas encore réalisé de diagnostic</p>
             </div>
         {% endif %}
+
+        <!-- Titre principal -->
+        <h2 class="diagnostic-title">Échelle de Stress de Holmes et Rahe</h2>
+
+        <!-- Explication de l'échelle -->
+        <div class="scale-description">
+            <p>
+                L’échelle de stress de <strong>Holmes et Rahe</strong> permet d'évaluer le niveau de stress accumulé en fonction des événements
+                de vie récents. Chaque événement est associé à un score de stress, et le total permet d’estimer le risque
+                de développer une maladie liée au stress.
+            </p>
+            <p><strong>Interprétation des scores :</strong></p>
+            <ul>
+                <li><span class="high-stress">Plus de 300 points :</span> Risque très élevé (80%) de troubles liés au stress.</li>
+                <li><span class="medium-stress">Entre 100 et 300 points :</span> Risque modéré (51%).</li>
+                <li><span class="low-stress">Moins de 100 points :</span> Faible risque (30%).</li>
+            </ul>
+        </div>
+
+        <!-- Tableau des événements stressants -->
+        <section class="diagnostic-history">
+            <h3>Principaux Événements Stressants</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Événement</th>
+                    <th>Score</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr><td>Décès du conjoint</td><td>100</td></tr>
+                <tr><td>Divorce</td><td>73</td></tr>
+                <tr><td>Séparation conjugale</td><td>65</td></tr>
+                <tr><td>Perte d’emploi</td><td>47</td></tr>
+                <tr><td>Départ à la retraite</td><td>45</td></tr>
+                <tr><td>Grossesse</td><td>40</td></tr>
+                <tr><td>Changement d'emploi</td><td>36</td></tr>
+                <tr><td>Problèmes financiers</td><td>31</td></tr>
+                <tr><td>Vacances</td><td>13</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Bouton pour démarrer le test -->
+        <div class="start-test">
+            {% if app.user %}
+                <a href="{{ path('app_diagnostic_new_user') }}" class="button new-diagnostic-btn" data-target="modal">
+                    ➕ Démarrer un nouveau test
+                </a>
+            {% else %}
+                <a href="{{ path('app_diagnostic_new') }}" class="button new-diagnostic-btn" data-target="modal">
+                    ➕ Démarrer un nouveau test
+                </a>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
