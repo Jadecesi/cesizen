@@ -143,6 +143,7 @@ class CustomModal {
             const hasSuccess = result.includes('alert-success');
             const errorModal = result.includes('Contenu introuvable.') || result.includes('exception occurred');
             const otherModal = this.overlay.querySelector('.modalImbriquer');
+            const redirectUrl = form.dataset.redirect;
 
             // 🔍 Vérifier si la réponse contient des erreurs
             if (result.includes('class="form-errors"') || result.includes('alert-danger')) {
@@ -150,13 +151,17 @@ class CustomModal {
                 this.setContent(result); // Recharge le modal avec le contenu mis à jour
                 // return;
             }
-            console.log(hasSuccess);
+            console.log(redirectUrl);
 
             if (hasSuccess) {
                 this.setLoading();
                 setTimeout(() => {
                     this.close();
-                    window.location.reload();
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl || form.action;
+                    } else {
+                        window.location.reload();
+                    }
                 }, 2000);
             } else if (result.includes('alert-danger')) {
                 this.setContent(result);
@@ -169,7 +174,11 @@ class CustomModal {
                 this.setLoading();
                 setTimeout(() => {
                     this.close();
-                    window.location.reload();
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl || form.action;
+                    } else {
+                        window.location.reload();
+                    }
                 }, 2000);
             }
         } catch (error) {

@@ -3,45 +3,47 @@
 {% block body %}
     {% if app.user %}
         {% if diagnostics is not empty %}
-            <section class="diagnostic-history">
-                <h3>Historique des résultats</h3>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Évènement de stress</th>
-                        <th>Score</th>
-                        <th>Commentaires</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for diagnostic in diagnostics %}
+            <div class="dashboard-content">
+                <section class="diagnostic-history">
+                    <h2 class="dashboard-title">Tableau de bord</h2>
+                    <table>
+                        <thead>
                         <tr>
-                            <td>{{ diagnostic.dateCreation|date('d/m/Y') }}</td>
-                            <td>
-                                <ul>
-                                    {% for reponse in diagnostic.reponses %}
-                                        {% for event in reponse.events %}
-                                            <li>{{ event.nom }}</li>
-                                        {% endfor %}
-                                    {% endfor %}
-                                </ul>
-                            </td>
-                            <td>{{ diagnostic.totalStress }}</td>
-                            <td>{{ diagnostic.getCommentaire(diagnostic.totalStress)|raw }}</td>
+                            <th>Date</th>
+                            <th>Évènement de stress</th>
+                            <th>Score</th>
+                            <th>Commentaires</th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </section>
+                        </thead>
+                        <tbody>
+                        {% for diagnostic in diagnostics %}
+                            <tr>
+                                <td>{{ diagnostic.dateCreation|date('d/m/Y') }}</td>
+                                <td>
+                                    <ul>
+                                        {% for reponse in diagnostic.reponses %}
+                                            {% for event in reponse.events %}
+                                                <li>{{ event.nom }}</li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td>{{ diagnostic.totalStress }}</td>
+                                <td>{{ diagnostic.getCommentaire(diagnostic.totalStress)|raw }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </section>
+            {% else %}
+                <div>
+                    <p>Vous n'avez pas encore réalisé de diagnostic</p>
+                </div>
+            {% endif %}
         {% else %}
             <div>
-                <p>Vous n'avez pas encore réalisé de diagnostic</p>
+                <p>Si vous souhaitez avoir un historique de vos diagnostics, vous devez créer un compte</p>
             </div>
         {% endif %}
-    {% else %}
-        <div>
-            <p>Si vous souhaitez avoir un historique de vos diagnostics, vous devez créer un compte</p>
-        </div>
-    {% endif %}
+    </div>
 {% endblock %}

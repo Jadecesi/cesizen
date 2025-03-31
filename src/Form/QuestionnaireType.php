@@ -24,13 +24,15 @@ class QuestionnaireType extends AbstractType
                 'required' => true,
             ]);
         if ($user) {
+            dump('ici', $user);
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Valider',
                 'attr' => [
-                    'class' => 'button btn-success-modal'
+                    'class' => 'button btn-success-modal modalRedirect',
                 ]
             ]);
         } else {
+            dump('la', $user);
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Valider',
                 'attr' => [

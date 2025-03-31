@@ -33,4 +33,34 @@
     </div>
 
     <p><strong>Si vous souhaitez avoir un historique de vos diagnostique. Vous devrais crée un compte</strong></p>
+
+    <div class="modal--actions">
+        <a data-redirect="{{ path('app_signup') }}" class="button new-diagnostic-btn" data-target="modal">S'inscrire</a>
+    </div>
+{% endblock %}
+
+{%  block js_modal %}
+<script>
+    function initPasswordToggle() {
+        document.addEventListener("click", function (e) {
+            const target = e.target.closest('[data-redirect][data-target="modal"]');
+            if (!target) return;
+
+            e.preventDefault();
+            const redirectUrl = target.dataset.redirect;
+            if (!redirectUrl) return;
+
+            // Ferme le modal courant
+            if (window.customModal) {
+                window.customModal.close();
+                setTimeout(() => {
+                    window.customModal.loadContentInModal(redirectUrl);
+                }, 300);
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", initPasswordToggle);
+    document.addEventListener("modalContentLoaded", initPasswordToggle);
+</script>
 {% endblock %}

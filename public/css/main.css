@@ -465,10 +465,17 @@ tbody tr:hover {
 }
 
 /* Titre */
-.dashboard-title {
+.diagnostic-title {
     font-size: 2rem;
     font-weight: bold;
     color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--accent-color);
     margin-bottom: 20px;
 }
 
@@ -913,4 +920,34 @@ tbody tr:nth-child(odd) {
 /* Assurer que le bouton ne cache pas le texte */
 .form-control {
     padding-right: 40px;
+}
+
+.stress-comment {
+    padding: 16px;
+    border-radius: 10px;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    margin: 10px 0;
+    background: #fffbe6;
+    border-left: 6px solid var(--accent-color);
+    color: #333;
+}
+
+/* Spécifique pour chaque niveau de stress */
+.stress-comment.high-stress {
+    background: #ffecec;
+    border-color: #e53935;
+    color: #c62828;
+}
+
+.stress-comment.medium-stress {
+    background: #fff4e5;
+    border-color: #ff9800;
+    color: #ef6c00;
+}
+
+.stress-comment.low-stress {
+    background: #e8f5e9;
+    border-color: #4caf50;
+    color: #2e7d32;
 }

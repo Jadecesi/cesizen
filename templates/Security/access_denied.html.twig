@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <main class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="fs-1"><strong>Accès refusé</strong></h1>
+                    <p>Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+                </div>
+                <div>
+                    <a href="{{ path('app_home') }}" class="button">Retour à l'accueil</a>
+                    <a href="{{ path('app_signup') }}" class="button" data-target="modal">S'inscrire</a>
+                </div>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block js_modal %}
+    <script src="{{ asset('js/modal.js') }}"></script>
+{% endblock %}

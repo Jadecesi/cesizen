@@ -3,8 +3,14 @@
 {% block body %}
     <div class="dashboard-content">
 
+        {% if diagnostics is null and app.user is not null %}
+            <div>
+                <p>Vous n'avez pas encore réalisé de diagnostic</p>
+            </div>
+        {% endif %}
+
         <!-- Titre principal -->
-        <h2 class="dashboard-title">Échelle de Stress de Holmes et Rahe</h2>
+        <h2 class="diagnostic-title">Échelle de Stress de Holmes et Rahe</h2>
 
         <!-- Explication de l'échelle -->
         <div class="scale-description">
