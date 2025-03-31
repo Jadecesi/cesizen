@@ -1,0 +1,68 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}Connexion{% endblock %}
+
+{% block modal_message_flash %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block modal_content %}
+    <form action="{{ path('app_login') }}" method="post">
+        <div class="form-group">
+            <label for="username">Email ou Nom d'utilisateur :</label>
+            <input type="text" id="username" required="required" name="_username" placeholder="Email ou Nom d'utilisateur" value="{{ last_username }}" class="form-control">
+        </div>
+        <div class="form-group">
+            <div class="profile-field">
+                <label for="password">Mot de passe:</label>
+                <div class="password-container">
+                    <input type="password" id="password" required="required" placeholder="Mot de passe" name="_password" class="form-control">
+                    <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <div class="text-center">
+            <button type="submit" class="btn btn-success-modal">Se connecter</button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block js_modal %}
+    <script>
+        function initPasswordToggle() {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const icon = this.querySelector('i');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", initPasswordToggle);
+        document.addEventListener("modalContentLoaded", initPasswordToggle);
+    </script>
+{% endblock %}

@@ -11,12 +11,23 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/diagnostic')]
 class DiagnosticController extends AbstractController
 {
+    private DiagnosticRepository $diagnosticRepository;
+
+    public function __construct
+    (
+        DiagnosticRepository $diagnosticRepository
+    )
+    {
+        $this->diagnosticRepository = $diagnosticRepository;
+    }
+
     #[Route('/', name: 'app_diagnostic_index', methods: ['GET', 'POST'])]
-    public function index(DiagnosticRepository $diagnosticRepository): Response
+    public function index(): Response
     {
         $user = $this->getUser();
         dump($user);
@@ -31,24 +42,59 @@ class DiagnosticController extends AbstractController
     }
 
     #[Route('/user', name: 'app_diagnostic_user_index', methods: ['GET', 'POST'])]
-    public function indexUser(DiagnosticRepository $diagnosticRepository): Response
+    #[IsGranted('IS_AUTHENTICATED')]
+    public function indexUser(): Response
     {
         $user = $this->getUser();
-        $diagnostics = $diagnosticRepository->getAllDiagnosticsByUser($user);
+        $diagnostics = $this->diagnosticRepository->getAllDiagnosticsByUser($user);
 
         return $this->render('Diagnostic/diagnostic.html.twig', [
             'diagnostics' => $diagnostics,
         ]);
     }
 
-
-
     #[Route('/new', name: 'app_diagnostic_new', methods: ['GET', 'POST'])]
+    public function newAnonymous(Request $request): Response
+    {
+        $stress = [];
+        $form = $this->createForm(QuestionnaireType::class, [], ['user' => false]);
+        $form->handleRequest($request);
+
+        $action = $this->generateUrl('app_diagnostic_new');
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $selectedEvents = $form->get('events')->getData();
+            foreach ($selectedEvents as $event) {
+                $stress[] = $event->getStress();
+            }
+            $totalStress = array_sum($stress);
+
+            $diagnostic = new Diagnostic();
+            $diagnostic->setTotalStress($totalStress);
+
+            // Rediriger vers la page de résultats avec le score
+            return $this->render('Diagnostic/result.html.twig', [
+                'totalStress' => $totalStress,
+                'events' => $selectedEvents,
+                'diagnostic' => $diagnostic,
+            ]);
+        }
+
+        return $this->render('Diagnostic/new.html.twig', [
+            'form' => $form->createView(),
+            'action' => $action
+        ]);
+    }
+
+    #[Route('/new/user', name: 'app_diagnostic_new_user', methods: ['GET', 'POST'])]
+    #[IsGranted('IS_AUTHENTICATED')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $stress = [];
-        $form = $this->createForm(QuestionnaireType::class);
+        $form = $this->createForm(QuestionnaireType::class, [], ['user' => true]);
         $form->handleRequest($request);
+
+        $action = $this->generateUrl('app_diagnostic_new_user');
 
         try {
             if ($form->isSubmitted() && $form->isValid()) {
@@ -75,7 +121,9 @@ class DiagnosticController extends AbstractController
                 $entityManager->persist($reponse);
                 $entityManager->flush();
 
-                return $this->redirectToRoute('app_diagnostic_index');
+                $this->addFlash('sucess', 'Diagnostic créé avec succès.');
+
+                return $this->redirectToRoute('app_diagnostic_dashboard');
             }
         } catch (\Exception $e) {
             $this->addFlash('error', 'Une erreur est survenue lors de la création du diagnostic.');
@@ -84,6 +132,23 @@ class DiagnosticController extends AbstractController
 
         return $this->render('Diagnostic/new.html.twig', [
             'form' => $form->createView(),
+            'action' => $action
+        ]);
+    }
+
+    #[Route('/user/dashboard', name: 'app_diagnostic_dashboard')]
+    #[IsGranted('IS_AUTHENTICATED')]
+    public function dashboard(): Response
+    {
+        $user = $this->getUser();
+        $diagnostics = $this->diagnosticRepository->getAllDiagnosticsByUser($user);
+
+        if (empty($diagnostics)) {
+            return $this->redirectToRoute('app_diagnostic_index');
+        }
+
+        return $this->render('Diagnostic/dashboard.html.twig', [
+            'diagnostics' => $diagnostics
         ]);
     }
 

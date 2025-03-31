@@ -1,0 +1,66 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}
+    Résultat de votre diagnostic
+{% endblock %}
+
+{% block modal_message_flash %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block modal_content %}
+    <div class="stress-score modalImbriquer">
+        <h3>Votre score de stress : {{ totalStress }}</h3>
+        <p>{{ diagnostic.getCommentaire(totalStress)|raw }}</p>
+    </div>
+
+    <div class="events-list">
+        <h3>Événements sélectionnés :</h3>
+        <ul>
+            {% for event in events %}
+                <li>{{ event.nom }} ({{ event.stress }} points)</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <p><strong>Si vous souhaitez avoir un historique de vos diagnostique. Vous devrais crée un compte</strong></p>
+
+    <div class="modal--actions">
+        <a data-redirect="{{ path('app_signup') }}" class="button new-diagnostic-btn" data-target="modal">S'inscrire</a>
+    </div>
+{% endblock %}
+
+{%  block js_modal %}
+<script>
+    function initPasswordToggle() {
+        document.addEventListener("click", function (e) {
+            const target = e.target.closest('[data-redirect][data-target="modal"]');
+            if (!target) return;
+
+            e.preventDefault();
+            const redirectUrl = target.dataset.redirect;
+            if (!redirectUrl) return;
+
+            // Ferme le modal courant
+            if (window.customModal) {
+                window.customModal.close();
+                setTimeout(() => {
+                    window.customModal.loadContentInModal(redirectUrl);
+                }, 300);
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", initPasswordToggle);
+    document.addEventListener("modalContentLoaded", initPasswordToggle);
+</script>
+{% endblock %}

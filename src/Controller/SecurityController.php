@@ -3,21 +3,20 @@
 namespace App\Controller;
 
 use App\Entity\Utilisateur;
-use App\Form\Security\LoginType;
 use App\Form\Security\SignupType;
 use App\Repository\RoleRepository;
 use App\Repository\UtilisateurRepository;
 use App\Security\AuthentificationAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use Symfony\Component\Security\Http\Authenticator\FormLoginAuthenticator;
 
 class SecurityController extends AbstractController
 {
@@ -31,7 +30,7 @@ class SecurityController extends AbstractController
             $this->addFlash('error', 'Identifiants incorrects.');
         }
 
-        return $this->render('security/login.html.twig', [
+        return $this->render('Security/login.html.twig', [
             'last_username' => $lastUsername
         ]);
     }
@@ -42,10 +41,9 @@ class SecurityController extends AbstractController
         throw new \Exception('Don\'t forget to activate logout in security.yaml');
     }
 
+    #[Route('/signup', name: 'app_signup')]
+    public function signup(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UtilisateurRepository $utilisateurRepository, RoleRepository $roleRepository, UserPasswordHasherInterface $userPasswordHasher, AuthentificationAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
 
-    #[Route(path: '/signup', name: 'app_signup')]
-    public function signup(Request $request, EntityManagerInterface $entityManager, RoleRepository $roleRepository, UserAuthenticatorInterface $userAuthenticator, AuthentificationAuthenticator $authenticator, UtilisateurRepository $utilisateurRepository, UserPasswordHasherInterface $userPasswordHasher): Response
-    {
         $form = $this->createForm(SignupType::class);
         $form->handleRequest($request);
 
@@ -81,8 +79,39 @@ class SecurityController extends AbstractController
             $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $user['password']));
             $utilisateur->setRole($role);
 
+            // Gestion de l'image de profil
+            /** @var UploadedFile $profilePicture */
+            $profilePicture = $form->get('profilePicture')->getData();
+            $defaultPicture = $form->get('defaultProfilePicture')->getData();
+
+            if ($profilePicture) {
+                $newFilename = uniqid() . '.' . $profilePicture->guessExtension();
+
+                try {
+                    $profilePicture->move(
+                        $this->getParameter('profile_pictures_directory'),
+                        $newFilename
+                    );
+                    $utilisateur->setPhotoProfile($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors du téléchargement de l\'image.');
+                }
+            } elseif ($defaultPicture) {
+                // Si l'utilisateur a sélectionné une image par défaut
+                $utilisateur->setPhotoProfile($defaultPicture);
+            } else {
+                // Si aucune image n'est sélectionnée, mettre une image par défaut
+                $utilisateur->setPhotoProfile('default.png');
+            }
+
+            // Hashage du mot de passe
+            $hashedPassword = $passwordHasher->hashPassword($utilisateur, $form->get('password')->getData());
+            $utilisateur->setPassword($hashedPassword);
+
             $entityManager->persist($utilisateur);
             $entityManager->flush();
+
+            $this->addFlash('success', 'Compte créé avec succès !');
 
             return $userAuthenticator->authenticateUser(
                 $utilisateur,
@@ -91,8 +120,14 @@ class SecurityController extends AbstractController
             );
         }
 
-        return $this->render('security/signup.html.twig', [
+        return $this->render('Security/signup.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/access-denied-public', name: 'app_access_denied_public')]
+    public function accessDeniedPublic(): Response
+    {
+        return $this->render('Security/access_denied.html.twig');
     }
 }
