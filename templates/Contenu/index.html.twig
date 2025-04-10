@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block header %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <div class="header-authenticated">
+            <a href="{{ path('app_home') }}"><img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen"></a>
+            <h1 style="margin-left: 150px;">Bienvenue {{ app.user.prenom }} {{ app.user.nom }}</h1>
+            <div class="header-buttons">
+                    {% if app.user and app.user.role.nom == 'Administrateur' %}
+                        <div class="admin-buttons-header">
+                            <a class="button" href="{{ path('app_contenu_new') }}" data-target="modal">Nouveau contenu</a>
+                        </div>
+                    {% endif %}
+                <div class="user-menu">
+                    <div class="user-profile"  onclick="toggleDropdown('userDropdownMenu')">
+                        <img src="{{ asset(('uploads/profiles/' ~ app.user.photoProfile)) }}" alt="Profil utilisateur">
+                    </div>
+                    <div class="dropdown-menu" id="userDropdownMenu">
+                        <a href="{{ path('app_profile') }}" class="dropdown-item" data-target="modal">Profil</a>
+                        <a href="{{ path('app_diagnostic_dashboard') }}" class="dropdown-item">Tableau de bord</a>
+                        <a href="{{ path('app_logout') }}" class="dropdown-item">Se déconnecter</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <main class="main-content">
+        <h1 class="content-title">Articles et contenus</h1>
+        <div class="content-grid">
+            {% for contenu in contenus %}
+                <article class="content-card">
+                    <div class="content-image">
+                        <img src="{{ asset('uploads/contenu/' ~ contenu.image) }}" alt="{{ contenu.titre }}">
+                    </div>
+                    <div class="content-info">
+                        <h2>{{ contenu.titre }}</h2>
+                        {% if contenu.description|length > 90 %}
+                            <p class="content-description">{{ contenu.description|slice(0, 90) }}...
+                                <a href="{{ path('app_contenu_description', {'id': contenu.id}) }}" data-target="modal">Afficher plus</a>
+                            </p>
+                        {% else %}
+                            <p class="content-description">{{ contenu.description }}</p>
+                        {% endif %}
+                        <div class="content-footer">
+                            {% if contenu.url %}
+                                <a href="{{ contenu.url }}" class="read-more">Lire plus</a>
+                            {% endif %}
+                            {%  if app.user and app.user.role.nom == 'Administrateur' %}
+                                <div class="user-menu">
+                                    <div onclick="toggleDropdown('contentDropdownMenu-{{ contenu.id }}')" class="user-profile">
+                                        <img src="{{ asset('icone/icons8-menu-2-100.png') }}" class="btn-dropdown-menu" alt="menu">
+                                    </div>
+                                    <div class="dropdown-menu" id="contentDropdownMenu-{{ contenu.id }}">
+                                        <a href="{{ path('app_contenu_edit', {'id': contenu.id}) }}" class="dropdown-item" data-target="modal">Modifier</a>
+                                        <a href="{{ path('app_contenu_confirm_delete', {'id': contenu.id}) }}" class="dropdown-item" data-target="modal">Supprimer</a>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}
+
+{#{% block js %}#}
+{#    <script src="{{ asset('/js/dropdownUser.js') }}"></script>#}
+{#{% endblock %}#}

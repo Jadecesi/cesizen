@@ -1,0 +1,11 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}Suppression de l'article{% endblock %}
+
+{% block modal_content %}
+    <h2>Êtes-vous sûr de vouloir supprimer ce contenu ?</h2>
+    <br>
+    <div class="modal--actions">
+        <a data-redirect="{{ path('app_contenu_delete', {'id': contenu.id}) }}" class="btn btn-danger btn-lg modalImbriquer" data-target="modal" onclick="initRedirection()">Supprimer</a>
+    </div>
+{% endblock %}
