@@ -13,7 +13,7 @@
 <body>
 <header>
     {% block header %}
-        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {% if is_granted('ROLE_USER') %}
             <div class="header-authenticated">
                 <a href="{{ path('app_home') }}"><img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen"></a>
                 {% if app.user.username is null %}

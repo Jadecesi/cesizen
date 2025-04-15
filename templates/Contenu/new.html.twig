@@ -17,7 +17,7 @@
 
 {% block modal_content %}
     <div class="form-container">
-        {%  if app.user.role.nom == 'Administrateur' %}
+        {%  if app.user.role.nom == 'ROLE_ADMIN' %}
             {{ form_errors(form.image) }}
             {{ form_start(form, {'action': action}) }}
             {{ form_row(form.titre) }}

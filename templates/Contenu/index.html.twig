@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
 {% block header %}
-    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+    {% if is_granted('ROLE_USER') %}
         <div class="header-authenticated">
             <a href="{{ path('app_home') }}"><img style="background-color: white;" src="{{ asset('img/logo-sans-font.png') }}" alt="Logo CESIZen"></a>
             <h1 style="margin-left: 150px;">Bienvenue {{ app.user.prenom }} {{ app.user.nom }}</h1>
             <div class="header-buttons">
-                    {% if app.user and app.user.role.nom == 'Administrateur' %}
+                    {% if app.user and app.user.role.nom == 'ROLE_ADMIN' %}
                         <div class="admin-buttons-header">
                             <a class="button" href="{{ path('app_contenu_new') }}" data-target="modal">Nouveau contenu</a>
                         </div>
@@ -50,7 +50,7 @@
                             {% if contenu.url %}
                                 <a href="{{ contenu.url }}" class="read-more">Lire plus</a>
                             {% endif %}
-                            {%  if app.user and app.user.role.nom == 'Administrateur' %}
+                            {%  if app.user and app.user.role.nom == 'ROLE_ADMIN' %}
                                 <div class="user-menu">
                                     <div onclick="toggleDropdown('contentDropdownMenu-{{ contenu.id }}')" class="user-profile">
                                         <img src="{{ asset('icone/icons8-menu-2-100.png') }}" class="btn-dropdown-menu" alt="menu">
