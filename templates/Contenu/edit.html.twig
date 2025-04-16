@@ -1,0 +1,47 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}Modification du contenu{% endblock %}
+
+{% block modal_message_flash %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block modal_content %}
+    <div class="form-container">
+        {%  if app.user.role.nom == 'ROLE_ADMIN' %}
+            {{ form_errors(form.image) }}
+            {{ form_start(form, {'action': action}) }}
+            {{ form_row(form.titre) }}
+            <div class="form-group">
+                {{ form_label(form.image) }}
+                {% if contenu.image %}
+                    <div class="current-image">
+                        <img src="{{ asset('uploads/contenu/' ~ contenu.image) }}"
+                             alt="Image actuelle"
+                             style="max-width: 200px; margin-bottom: 10px;">
+                        <p>Image actuelle</p>
+                    </div>
+                {% endif %}
+                {{ form_widget(form.image) }}
+                {{ form_errors(form.image) }}
+            </div>
+
+            {{ form_row(form.url) }}
+            {{ form_row(form.description) }}
+            <div class="modal--actions">
+                {{ form_label(form.submit) }}
+                {{ form_widget(form.submit) }}
+            </div>
+            {{ form_end(form) }}
+        {% endif %}
+    </div>
+{% endblock %}

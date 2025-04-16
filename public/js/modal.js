@@ -149,7 +149,7 @@ class CustomModal {
             if (result.includes('class="form-errors"') || result.includes('alert-danger')) {
                 console.warn("Erreur détectée dans le formulaire !");
                 this.setContent(result); // Recharge le modal avec le contenu mis à jour
-                // return;
+                return;
             }
             console.log(redirectUrl);
 

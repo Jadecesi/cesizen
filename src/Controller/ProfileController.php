@@ -29,7 +29,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/', name: 'app_profile')]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('ROLE_USER')]
     public function editProfile(
         Request $request,
         EntityManagerInterface $entityManager,
