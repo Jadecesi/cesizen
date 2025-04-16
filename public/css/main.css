@@ -4,6 +4,7 @@
     --accent-color: #FFC107;
     --neutral-color: #F5F5F5;
     --text-color: #333;
+    --accent-color-secondary: #C49403FF;
     --font-main: 'Open Sans', sans-serif;
 }
 
@@ -110,8 +111,6 @@ a {
 }
 
 .button {
-    background: var(--primary-color);
-    color: white;
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 10px;
@@ -121,7 +120,21 @@ a {
     margin: 0 0.5rem;
 }
 
-.button:hover {
+.btn-yellow {
+    background: var(--accent-color);
+    color: white;
+}
+
+.btn-yellow:hover {
+    background: var(--accent-color-secondary);
+}
+
+.btn-green {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-green:hover {
     background: var(--secondary-color);
 }
 
