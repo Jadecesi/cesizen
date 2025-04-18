@@ -72,6 +72,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->diagnostics = new ArrayCollection();
         $this->contenus = new ArrayCollection();
+        $this->role = new Role();
+        $this->role->setNom('ROLE_USER');
     }
 
     public function getId(): ?int

@@ -46,22 +46,24 @@
                         {% else %}
                             <p class="content-description">{{ contenu.description }}</p>
                         {% endif %}
-                        <div class="content-footer">
-                            {% if contenu.url %}
-                                <a href="{{ contenu.url }}" class="read-more">Lire plus</a>
-                            {% endif %}
-                            {%  if app.user and app.user.role.nom == 'ROLE_ADMIN' %}
-                                <div class="user-menu">
-                                    <div onclick="toggleDropdown('contentDropdownMenu-{{ contenu.id }}')" class="user-profile">
-                                        <img src="{{ asset('icone/icons8-menu-2-100.png') }}" class="btn-dropdown-menu" alt="menu">
+                        {% if contenu.url or (app.user and app.user.role.nom == 'ROLE_ADMIN') %}
+                            <div class="content-footer">
+                                {% if contenu.url %}
+                                    <a href="{{ contenu.url }}" class="read-more">Lire plus</a>
+                                {% endif %}
+                                {% if app.user and app.user.role.nom == 'ROLE_ADMIN' %}
+                                    <div class="user-menu">
+                                        <div onclick="toggleDropdown('contentDropdownMenu-{{ contenu.id }}')" class="user-profile">
+                                            <img src="{{ asset('icone/icons8-menu-2-100.png') }}" class="btn-dropdown-menu" alt="menu">
+                                        </div>
+                                        <div class="dropdown-menu" id="contentDropdownMenu-{{ contenu.id }}">
+                                            <a href="{{ path('app_contenu_edit', {'id': contenu.id}) }}" class="dropdown-item" data-target="modal">Modifier</a>
+                                            <a href="{{ path('app_contenu_confirm_delete', {'id': contenu.id}) }}" class="dropdown-item" data-target="modal">Supprimer</a>
+                                        </div>
                                     </div>
-                                    <div class="dropdown-menu" id="contentDropdownMenu-{{ contenu.id }}">
-                                        <a href="{{ path('app_contenu_edit', {'id': contenu.id}) }}" class="dropdown-item" data-target="modal">Modifier</a>
-                                        <a href="{{ path('app_contenu_confirm_delete', {'id': contenu.id}) }}" class="dropdown-item" data-target="modal">Supprimer</a>
-                                    </div>
-                                </div>
-                            {% endif %}
-                        </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                 </article>
             {% endfor %}

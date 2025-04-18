@@ -68,7 +68,7 @@ class SecurityController extends AbstractController
                 ]);
             }
 
-            $role = $roleRepository->findOneBy(['nom' => 'Utilisateur']);
+            $role = $roleRepository->findOneBy(['nom' => 'ROLE_USER']);
 
             $utilisateur = new Utilisateur();
             $utilisateur->setPrenom($user['prenom']);
@@ -108,6 +108,7 @@ class SecurityController extends AbstractController
             $hashedPassword = $passwordHasher->hashPassword($utilisateur, $form->get('password')->getData());
             $utilisateur->setPassword($hashedPassword);
 
+            dump($utilisateur);
             $entityManager->persist($utilisateur);
             $entityManager->flush();
 
