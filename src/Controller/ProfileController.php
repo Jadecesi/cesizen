@@ -68,8 +68,6 @@ class ProfileController extends AbstractController
             $user->setDateNaissance($dateNaissance);
             $user->setUsername($username);
 
-
-
             $existingPhotoProfile = $user->getPhotoProfile();
             $uploadDir = $this->getParameter('profile_pictures_directory');
 

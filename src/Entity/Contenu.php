@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ContenuRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: ContenuRepository::class)]
@@ -14,12 +15,15 @@ class Contenu
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['api_contenu'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['api_contenu'])]
     private ?string $titre = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['api_contenu'])]
     private ?string $image = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
@@ -33,9 +37,11 @@ class Contenu
     private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: false)]
+    #[Groups(['api_contenu'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['api_contenu'])]
     private ?string $url = null;
 
     public function __construct()
