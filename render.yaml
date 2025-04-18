@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: cesizen-app
+    env: docker
+    plan: free
+    autoDeploy: true
+    buildCommand: ""
+    startCommand: "php -S 0.0.0.0:8000 -t public"
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "0"
+      - key: DATABASE_URL
+        value: "mysql://root:loJQDFeslGmEprVzCmbVbYIMHqVKIwWF@caboose.proxy.rlwy.net:11741/railway"

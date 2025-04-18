@@ -29,7 +29,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/', name: 'app_profile')]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('ROLE_USER')]
     public function editProfile(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -67,8 +67,6 @@ class ProfileController extends AbstractController
             $user->setEmail($email);
             $user->setDateNaissance($dateNaissance);
             $user->setUsername($username);
-
-
 
             $existingPhotoProfile = $user->getPhotoProfile();
             $uploadDir = $this->getParameter('profile_pictures_directory');

@@ -1,5 +1,5 @@
-function toggleDropdown() {
-    let dropdown = document.getElementById("dropdownMenu");
+function toggleDropdown(id) {
+    let dropdown = document.getElementById(id);
     if (dropdown) {
         dropdown.classList.toggle("show");
     }
@@ -7,8 +7,10 @@ function toggleDropdown() {
 
 // Ferme le menu si on clique ailleurs
 window.onclick = function(event) {
-    let dropdown = document.getElementById("dropdownMenu");
-    if (dropdown && !event.target.closest('.user-menu')) {
-        dropdown.classList.remove("show");
-    }
+    let dropdowns = document.querySelectorAll('.dropdown-menu');
+    dropdowns.forEach(function(dropdown) {
+        if (!event.target.closest('.user-menu')) {
+            dropdown.classList.remove("show");
+        }
+    });
 };

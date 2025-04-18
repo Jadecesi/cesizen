@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ContenuRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: ContenuRepository::class)]
@@ -14,19 +15,39 @@ class Contenu
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['api_contenu'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['api_contenu'])]
     private ?string $titre = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $nom = null;
-
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['api_contenu'])]
     private ?string $image = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateModification = null;
+
+    #[ORM\ManyToOne(inversedBy: 'contenus')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Utilisateur $utilisateur = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $dateCreation = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: false)]
+    #[Groups(['api_contenu'])]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['api_contenu'])]
+    private ?string $url = null;
+
+    public function __construct()
+    {
+        $this->dateCreation = new \DateTime('now');
+    }
 
     public function getId(): ?int
     {
@@ -41,18 +62,6 @@ class Contenu
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
-        return $this;
-    }
-
-    public function getNom(): ?string
-    {
-        return $this->nom;
-    }
-
-    public function setNom(string $nom): static
-    {
-        $this->nom = $nom;
 
         return $this;
     }
@@ -78,6 +87,54 @@ class Contenu
     {
         $dateModification = new \DateTime('now');
         $this->dateModification = $dateModification;
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    public function getDateCreation(): ?\DateTimeInterface
+    {
+        return $this->dateCreation;
+    }
+
+    public function setDateCreation(\DateTimeInterface $dateCreation): static
+    {
+        $this->dateCreation = $dateCreation;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getUrl(): ?string
+    {
+        return $this->url;
+    }
+
+    public function setUrl(?string $url): static
+    {
+        $this->url = $url;
 
         return $this;
     }

@@ -1,0 +1,34 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}Ajout d'un contenu{% endblock %}
+
+{% block modal_message_flash %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endblock %}
+
+{% block modal_content %}
+    <div class="form-container">
+        {%  if app.user.role.nom == 'ROLE_ADMIN' %}
+            {{ form_errors(form.image) }}
+            {{ form_start(form, {'action': action}) }}
+            {{ form_row(form.titre) }}
+            {{ form_row(form.image) }}
+            {{ form_row(form.url) }}
+            {{ form_row(form.description) }}
+            <div class="modal--actions">
+                {{ form_label(form.submit) }}
+                {{ form_widget(form.submit) }}
+            </div>
+            {{ form_end(form) }}
+        {% endif %}
+    </div>
+{% endblock %}

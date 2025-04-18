@@ -62,9 +62,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     )]
     private ?string $photoProfile = null;
 
+    /**
+     * @var Collection<int, Contenu>
+     */
+    #[ORM\OneToMany(targetEntity: Contenu::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $contenus;
+
     public function __construct()
     {
         $this->diagnostics = new ArrayCollection();
+        $this->contenus = new ArrayCollection();
+        $this->role = new Role();
+        $this->role->setNom('ROLE_USER');
     }
 
     public function getId(): ?int
@@ -224,6 +233,36 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhotoProfile(?string $photoProfile): self
     {
         $this->photoProfile = $photoProfile;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Contenu>
+     */
+    public function getContenus(): Collection
+    {
+        return $this->contenus;
+    }
+
+    public function addContenu(Contenu $contenu): static
+    {
+        if (!$this->contenus->contains($contenu)) {
+            $this->contenus->add($contenu);
+            $contenu->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeContenu(Contenu $contenu): static
+    {
+        if ($this->contenus->removeElement($contenu)) {
+            // set the owning side to null (unless already changed)
+            if ($contenu->getUtilisateur() === $this) {
+                $contenu->setUtilisateur(null);
+            }
+        }
 
         return $this;
     }
