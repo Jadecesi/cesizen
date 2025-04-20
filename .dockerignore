@@ -1,0 +1,29 @@
+# Ignorer les dossiers inutiles
+.git
+.gitignore
+docker-compose.yml
+docker/
+tests/
+var/
+vendor/
+
+# Fichiers de config locaux
+.env.local
+.env.*.local
+.env.test
+
+# Fichiers système
+*.log
+*.lock
+*.sqlite
+.idea/
+.vscode/
+.DS_Store
+
+# Caches
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Assets Webpack (si buildé en dehors de Docker)
+public/build/
