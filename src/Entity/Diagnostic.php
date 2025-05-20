@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: DiagnosticRepository::class)]
@@ -16,6 +17,7 @@ class Diagnostic
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['api_user'])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
@@ -111,6 +113,17 @@ class Diagnostic
         }
 
         return $this;
+    }
+
+    public function getNiveauStress(int $totalStress): string
+    {
+        if ($totalStress >= 300) {
+            return 'Élevé';
+        } elseif ($totalStress >= 100 && $totalStress < 300) {
+            return 'Modéré';
+        } else {
+            return 'Faible';
+        }
     }
 
     public function getCommentaire(int $totalStress): ?string

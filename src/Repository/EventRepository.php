@@ -16,6 +16,17 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
+    public function findByCategory(int $categorieId): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.categorie = :categorieId')
+            ->setParameter('categorieId', $categorieId)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getResult();
+    }
+
+
 //    /**
 //     * @return Event[] Returns an array of Event objects
 //     */

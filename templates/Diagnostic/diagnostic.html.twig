@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Diagnostic{% endblock %}
+
 {% block body %}
     <div class="dashboard-content">
 
@@ -38,15 +40,14 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr><td>Décès du conjoint</td><td>100</td></tr>
-                <tr><td>Divorce</td><td>73</td></tr>
-                <tr><td>Séparation conjugale</td><td>65</td></tr>
-                <tr><td>Perte d’emploi</td><td>47</td></tr>
-                <tr><td>Départ à la retraite</td><td>45</td></tr>
-                <tr><td>Grossesse</td><td>40</td></tr>
-                <tr><td>Changement d'emploi</td><td>36</td></tr>
-                <tr><td>Problèmes financiers</td><td>31</td></tr>
-                <tr><td>Vacances</td><td>13</td></tr>
+                {% for categorie in categories %}
+                    {% for event in eventsByCategory[categorie.id] %}
+                        <tr>
+                            <td>{{ event.nom }}</td>
+                            <td>{{ event.stress }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
                 </tbody>
             </table>
         </section>
@@ -55,11 +56,11 @@
         <div class="start-test">
             {% if app.user %}
                 <a href="{{ path('app_diagnostic_new_user') }}" class="button new-diagnostic-btn" data-target="modal">
-                    ➕ Démarrer un nouveau test
+                    <i class="fa-solid fa-plus"></i> Démarrer un nouveau test
                 </a>
             {% else %}
                 <a href="{{ path('app_diagnostic_new') }}" class="button new-diagnostic-btn" data-target="modal">
-                    ➕ Démarrer un nouveau test
+                    <i class="fa-solid fa-plus"></i> Démarrer un nouveau test
                 </a>
             {% endif %}
         </div>

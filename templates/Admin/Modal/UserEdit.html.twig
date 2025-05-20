@@ -1,0 +1,79 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}{{ utilisateur.username ?: utilisateur.nom ~ ' ' ~ utilisateur.prenom }}{% endblock %}
+
+{% block modal_message_flash %}
+    {% include 'part/addFlash.html.twig' %}
+{% endblock %}
+
+
+{% block modal_content %}
+    <div class="profile-picture">
+        {% if app.user.photoProfile %}
+            <img src="{{ asset('uploads/profiles/' ~ app.user.photoProfile) }}" alt="Photo de profil">
+        {% else %}
+            <img src="{{ asset('images/profilePicture1.png') }}" alt="Photo par défaut">
+        {% endif %}
+    </div>
+
+    {{ form_start(form, {'action': action}) }}
+
+    <div class="profile-field">
+        {{ form_label(form.nom) }}
+        {{ form_widget(form.nom) }}
+        {{ form_errors(form.nom) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.prenom) }}
+        {{ form_widget(form.prenom) }}
+        {{ form_errors(form.prenom) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {{ form_errors(form.email) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.dateNaissance) }}
+        {{ form_widget(form.dateNaissance) }}
+        {{ form_errors(form.dateNaissance) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.username) }}
+        {{ form_widget(form.username) }}
+        {{ form_errors(form.username) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.apiToken) }}
+        {{ form_widget(form.apiToken) }}
+        {{ form_errors(form.apiToken) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.tokenExpiresAt) }}
+        {{ form_widget(form.tokenExpiresAt) }}
+        {{ form_errors(form.tokenExpiresAt) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.role) }}
+        {{ form_widget(form.role) }}
+        {{ form_errors(form.role) }}
+    </div>
+
+    <div class="profile-buttons">
+        {{ form_widget(form.modifier) }}
+    </div>
+
+    {{ form_end(form) }}
+{% endblock %}
+
+
+
+
+

@@ -29,6 +29,9 @@ class Event
     #[ORM\ManyToMany(targetEntity: Reponse::class, mappedBy: 'events')]
     private Collection $reponses;
 
+    #[ORM\ManyToOne(inversedBy: 'events')]
+    private ?CategorieEvent $categorie = null;
+
     public function __construct()
     {
         $this->reponses = new ArrayCollection();
@@ -86,6 +89,18 @@ class Event
         if ($this->reponses->removeElement($reponse)) {
             $reponse->removeEvent($this);
         }
+
+        return $this;
+    }
+
+    public function getCategorie(): ?CategorieEvent
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?CategorieEvent $categorie): static
+    {
+        $this->categorie = $categorie;
 
         return $this;
     }

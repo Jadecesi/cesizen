@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
@@ -18,10 +19,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['api_user'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
     #[Assert\Email]
+    #[Groups(['api_user'])]
     private ?string $email = null;
 
     /**
@@ -32,41 +35,53 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\ManyToOne(inversedBy: 'utilisateurs')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['api_user'])]
     private ?Role $role = null;
 
     /**
      * @var Collection<int, Diagnostic>
      */
     #[ORM\OneToMany(targetEntity: Diagnostic::class, mappedBy: 'utilisateur')]
+    #[Groups(['api_user'])]
     private Collection $diagnostics;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['api_user'])]
     private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['api_user'])]
     private ?string $prenom = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['api_user'])]
     private ?\DateTimeInterface $dateNaissance = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['api_user'])]
     private ?string $username = null;
 
     #[ORM\Column(type: "string", length: 255, nullable: true)]
-    #[Assert\File(
-        maxSize: "2M",
-        maxSizeMessage: "Le fichier est trop volumineux. La taille maximale autorisée est 2 Mo.",
-        mimeTypes: ["image/jpeg", "image/png"],
-        mimeTypesMessage: "Veuillez télécharger une image valide (JPG ou PNG).",
-        notFoundMessage: "Le fichier n'a pas pu être trouvé."
-    )]
+    #[Groups(['api_user'])]
     private ?string $photoProfile = null;
 
     /**
      * @var Collection<int, Contenu>
      */
     #[ORM\OneToMany(targetEntity: Contenu::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[Groups(['api_user'])]
     private Collection $contenus;
+
+    #[ORM\Column(type: 'string', length: 255, unique: true, nullable: true)]
+    #[Groups(['api_user'])]
+    private ?string $apiToken = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    #[Groups(['api_user'])]
+    private ?\DateTimeImmutable $tokenExpiresAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?bool $isActif = null; //Actif = 1 désactivé = 0
 
     public function __construct()
     {
@@ -265,5 +280,52 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(string $apiToken): static
+    {
+        $this->apiToken = $apiToken;
+
+        return $this;
+    }
+
+    public function getTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->tokenExpiresAt;
+    }
+
+    public function setTokenExpiresAt(?\DateTimeImmutable $tokenExpiresAt): static
+    {
+        $this->tokenExpiresAt = $tokenExpiresAt;
+
+        return $this;
+    }
+
+    public function isActif(): ?bool
+    {
+        return $this->isActif;
+    }
+
+    public function setIsActif(?bool $isActif): static
+    {
+        $this->isActif = $isActif;
+
+        return $this;
+    }
+
+    public function getAge()
+    {
+        if (!$this->dateNaissance) {
+            return null;
+        }
+
+        return $this->dateNaissance
+            ->diff(new \DateTime())
+            ->y;
     }
 }

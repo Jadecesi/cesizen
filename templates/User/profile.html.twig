@@ -3,16 +3,7 @@
 {% block modal_title %}{{ app.user.username ?: app.user.nom ~ ' ' ~ app.user.prenom }}{% endblock %}
 
 {% block modal_message_flash %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">
-            {{ message }}
-        </div>
-    {% endfor %}
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">
-            {{ message }}
-        </div>
-    {% endfor %}
+    {% include 'part/addFlash.html.twig' %}
 {% endblock %}
 
 
@@ -71,6 +62,7 @@
     <div class="profile-buttons">
         <a class="button btn-fermer hidden">Annuler</a>
         <a type="button" id="editButton" class="button edit-btn">Modifier</a>
+        <a class="button btn-reset-password hidden" href="{{ path('app_forgot_password_request') }}">Changer votre mot de passe</a>
         {{ form_widget(form.save, {'attr': {'class': 'button save-btn hidden'}}) }}
     </div>
 
@@ -85,9 +77,12 @@
             let editButton = document.getElementById("editButton");
             let saveButton = document.querySelector(".save-btn");
             let annulerButton = document.querySelector(".btn-fermer");
+            let resetPasswordBtn = document.querySelector(".btn-reset-password");
             let inputs = document.querySelectorAll("#profileForm input");
             let inputChamps = document.querySelector('#phtotoProfileHidden');
             let errorMessages = document.querySelectorAll(".alert-danger");
+
+            console.log('resetPasswordBtn', resetPasswordBtn);
 
             if (!editButton) {
                 console.error("Le bouton Modifier n'existe pas !");
@@ -101,10 +96,12 @@
             // Suppression des anciens événements pour éviter les doublons
             editButton.removeEventListener("click", enableEditing);
             annulerButton.removeEventListener("click", cancelEditing);
+            resetPasswordBtn.removeEventListener("click", enableEditing);
 
             // Ajout des événements
             editButton.addEventListener("click", enableEditing);
             annulerButton.addEventListener("click", cancelEditing);
+            resetPasswordBtn.addEventListener("click", cancelEditing);
 
             function enableEditing() {
                 console.log("Mode édition activé !");
@@ -113,6 +110,7 @@
                 annulerButton.classList.remove("hidden");
                 saveButton.classList.remove("hidden");
                 inputChamps.classList.remove("hidden");
+                resetPasswordBtn.classList.remove("hidden");
             }
 
             function cancelEditing() {
@@ -126,6 +124,7 @@
                 annulerButton.classList.add("hidden");
                 saveButton.classList.add("hidden");
                 inputChamps.classList.add("hidden");
+                resetPasswordBtn.classList.add("hidden");
             }
 
             // ✅ Afficher les boutons si une erreur existe déjà dans le formulaire

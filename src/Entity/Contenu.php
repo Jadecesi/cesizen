@@ -15,7 +15,7 @@ class Contenu
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['api_contenu'])]
+    #[Groups(['api_contenu', 'api_user'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]

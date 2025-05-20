@@ -1,0 +1,11 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}{{ titre }}{% endblock %}
+
+{% block modal_content %}
+    <h3>{{ text }}</h3>
+    <br>
+    <div class="text-center">
+        <a href="{{ action }}" class="btn btn-success">{{ btn }}</a>
+    </div>
+{% endblock %}

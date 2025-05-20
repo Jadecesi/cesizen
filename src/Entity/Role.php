@@ -6,6 +6,7 @@ use App\Repository\RoleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
@@ -18,6 +19,7 @@ class Role
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['api_user'])]
     private ?string $nom = null;
 
     /**
@@ -76,5 +78,21 @@ class Role
         }
 
         return $this;
+    }
+
+    public function __toString()
+    {
+        switch ($this->nom) {
+            case 'ROLE_ADMIN':
+                $role = 'Administrateur';
+                break;
+            case 'ROLE_USER':
+                $role = 'Utilisateur';
+                break;
+            default:
+                $role = $this->nom;
+        }
+
+        return $role;
     }
 }

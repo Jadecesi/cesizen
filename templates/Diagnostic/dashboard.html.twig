@@ -1,11 +1,51 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Tableau de board{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('/css/dashboardAdmin.css') }}">
+{% endblock %}
+
+{#{% block navBarBtn %}#}
+{#    {% if is_granted('ROLE_USER') %}#}
+{#        <div class="admin-buttons-header">#}
+{#            <a href="{{ path('app_diagnostic_new_user') }}" class="button new-diagnostic-btn" data-target="modal">#}
+{#                <i class="fa-solid fa-plus"></i> Nouveau diagnostic#}
+{#            </a>#}
+{#        </div>#}
+{#    {% endif %}#}
+{#{% endblock %}#}
+
 {% block body %}
-    {% if app.user %}
+    {% if is_granted('ROLE_USER') %}
         {% if diagnostics is not empty %}
-            <div class="dashboard-content">
-                <section class="diagnostic-history">
-                    <h2 class="dashboard-title">Tableau de bord</h2>
+            <div class="admin-dashboard">
+                <div class="statistics-section">
+                    <div class="row align-items-center">
+                        <h3 class="col-11" style="color: #2c3e50; font-size: 1.8rem; font-weight: 600;">Statistiques générales</h3>
+                    </div>
+                    <hr/>
+                    <div class="charts-grid">
+                        <div class="chart-wrapper">
+                            <div class="chart-title">Top 5 des événements stressants</div>
+                            <div class="chart-container">
+                                <canvas id="facteurStress"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper" style="grid-column: span 2;">
+                            <div class="chart-title">Suivi de votre niveau de stress</div>
+                            <div class="chart-container">
+                                <canvas id="evolutionStress"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <section class="diagnostic-history statistics-section">
+                    <div class="row align-items-center">
+                        <h3 class="col-11" style="color: #2c3e50; font-size: 1.8rem; font-weight: 600;">Historique de vos diagnostic</h3>
+                        <a href="{{ path('app_diagnostic_new_user') }}" class="col-1 fa-2xl fa-solid fa-circle-plus" style="color: #ffc107" data-target="modal"></a>
+                    </div>
+                    <hr/>
                     <table>
                         <thead>
                         <tr>
@@ -35,15 +75,198 @@
                         </tbody>
                     </table>
                 </section>
-            {% else %}
-                <div>
-                    <p>Vous n'avez pas encore réalisé de diagnostic</p>
-                </div>
-            {% endif %}
-        {% else %}
-            <div>
-                <p>Si vous souhaitez avoir un historique de vos diagnostics, vous devez créer un compte</p>
             </div>
         {% endif %}
-    </div>
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new Chart(document.getElementById('facteurStress'), {
+            type: 'pie',
+            data: {
+                labels: {{ chartDataFacteurStress.labels|json_encode|raw }},
+                datasets: [{
+                    data: {{ chartDataFacteurStress.data|json_encode|raw }},
+                    backgroundColor: [
+                        'rgba(46, 125, 50, 0.85)',    // Vert
+                        'rgba(230, 81, 0, 0.85)',     // Orange
+                        'rgba(33, 150, 243, 0.85)',   // Bleu
+                        'rgba(156, 39, 176, 0.85)',   // Violet
+                        'rgba(255, 193, 7, 0.85)'     // Jaune
+                    ],
+                    borderColor: 'white',
+                    borderWidth: 2,
+                    hoverBorderColor: 'white',
+                    hoverBorderWidth: 3,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12,
+                                family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                            },
+                            usePointStyle: true,
+                            boxWidth: 10,
+                            color: '#2c3e50'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#2c3e50',
+                        bodyColor: '#2c3e50',
+                        borderColor: '#ddd',
+                        borderWidth: 1,
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold',
+                            family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                        },
+                        bodyFont: {
+                            size: 13,
+                            family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                        },
+                        displayColors: true,
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        usePointStyle: true,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.parsed || 0;
+                                return label + ' : ' + value;
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 20,
+                        right: 20,
+                        bottom: 20,
+                        left: 20
+                    }
+                }
+            }
+        });
+
+            new Chart(document.getElementById('evolutionStress'), {
+                type: 'line',
+                data: {
+                    labels: {{ chartDataEvolutionStress.labels|json_encode|raw }},
+                    datasets: [{
+                        label: 'Niveau de stress',
+                        data: {{ chartDataEvolutionStress.data|json_encode|raw }},
+                        borderColor: 'rgb(46,125,50)',
+                        backgroundColor: 'rgba(46,125,50,0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: 'rgb(46,125,50)',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        borderWidth: 3
+                    },
+                        {
+                            label: 'Moyenne générale',
+                            data: Array({{ chartDataEvolutionStress.labels|length }}).fill({{ chartDataEvolutionStress.moyenneGenerale }}),
+                            borderColor: 'rgb(255,87,34)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                },
+                                usePointStyle: true,
+                                boxWidth: 10
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#2c3e50',
+                            bodyColor: '#2c3e50',
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold',
+                                family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 13,
+                                family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                            },
+                            displayColors: true,
+                            boxWidth: 10,
+                            boxHeight: 10,
+                            usePointStyle: true,
+                            callbacks: {
+                                title: function(context) {
+                                    return 'Date : ' + context[0].label;
+                                },
+                                label: function(context) {
+                                    if (context.dataset.label === 'Niveau de stress') {
+                                        return 'Niveau : ' + context.parsed.y;
+                                    } else {
+                                        return 'Moyenne : ' + context.parsed.y;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Niveau de stress',
+                                color: '#2c3e50',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold',
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                color: '#2c3e50',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold',
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 {% endblock %}

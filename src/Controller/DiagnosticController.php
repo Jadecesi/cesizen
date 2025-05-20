@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\Diagnostic;
 use App\Entity\Reponse;
 use App\Form\QuestionnaireType;
+use App\Repository\CategorieEventRepository;
 use App\Repository\DiagnosticRepository;
+use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,10 +29,15 @@ class DiagnosticController extends AbstractController
     }
 
     #[Route('/', name: 'app_diagnostic_index', methods: ['GET', 'POST'])]
-    public function index(): Response
+    public function index(CategorieEventRepository $categorieEventRepository, EventRepository $eventRepository): Response
     {
         $user = $this->getUser();
-        dump($user);
+        $categories = $categorieEventRepository->findAll();
+
+        $eventsByCategory = [];
+        foreach ($categories as $category) {
+            $eventsByCategory[$category->getId()] = $eventRepository->findByCategory($category->getId());
+        }
 
         if (!empty($user)) {
             return $this->redirectToRoute('app_diagnostic_user_index');
@@ -38,18 +45,29 @@ class DiagnosticController extends AbstractController
 
         return $this->render('Diagnostic/diagnostic.html.twig', [
             'diagnostics' => null,
+            'categories' => $categories,
+            'eventsByCategory' => $eventsByCategory
         ]);
     }
 
     #[Route('/user', name: 'app_diagnostic_user_index', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED')]
-    public function indexUser(): Response
+    public function indexUser(CategorieEventRepository $categorieEventRepository, EventRepository $eventRepository): Response
     {
         $user = $this->getUser();
         $diagnostics = $this->diagnosticRepository->getAllDiagnosticsByUser($user);
 
+        $categories = $categorieEventRepository->findAll();
+
+        $eventsByCategory = [];
+        foreach ($categories as $category) {
+            $eventsByCategory[$category->getId()] = $eventRepository->findByCategory($category->getId());
+        }
+
         return $this->render('Diagnostic/diagnostic.html.twig', [
             'diagnostics' => $diagnostics,
+            'categories' => $categories,
+            'eventsByCategory' => $eventsByCategory,
         ]);
     }
 
@@ -142,13 +160,28 @@ class DiagnosticController extends AbstractController
     {
         $user = $this->getUser();
         $diagnostics = $this->diagnosticRepository->getAllDiagnosticsByUser($user);
+        $facteurStress = $this->getFacteurStress($diagnostics);
+        $evolutionStress = $this->getEvolutionStressByDate($diagnostics);
+
+        $chartDataFacteurStress = [
+            'labels' => $facteurStress['labels'],
+            'data' => $facteurStress['data']
+        ];
+
+        $chartDataEvolutionStress = [
+            'labels' => $evolutionStress['labels'],
+            'data' => $evolutionStress['data'],
+            'moyenneGenerale' => $evolutionStress['moyenneGenerale']
+        ];
 
         if (empty($diagnostics)) {
             return $this->redirectToRoute('app_diagnostic_index');
         }
 
         return $this->render('Diagnostic/dashboard.html.twig', [
-            'diagnostics' => $diagnostics
+            'diagnostics' => $diagnostics,
+            'chartDataFacteurStress' => $chartDataFacteurStress,
+            'chartDataEvolutionStress' => $chartDataEvolutionStress,
         ]);
     }
 
@@ -179,5 +212,66 @@ class DiagnosticController extends AbstractController
         }
 
         return $this->redirectToRoute('app_diagnostic_index');
+    }
+
+    public function getFacteurStress(array $diagnostics)
+    {
+        $stats = [];
+        foreach ($diagnostics as $diagnostic) {
+            foreach ($diagnostic->getReponses() as $reponse) {
+                foreach ($reponse->getEvents() as $event) {
+                    $label = $event->getNom();
+                    $stats[$label] = ($stats[$label] ?? 0) + 1;
+                }
+            }
+        }
+        arsort($stats);
+
+        $stats = array_slice($stats, 0, 5, true);
+
+        return [
+            'labels' => array_keys($stats),
+            'data' => array_values($stats)
+        ];
+    }
+
+    public function getEvolutionStressByDate($diagnostics)
+    {
+        $stats = [];
+        $moyenneGenerale = [];
+        $timestamps = [];
+
+        foreach ($diagnostics as $diagnostic) {
+            $date = $diagnostic->getDateCreation();
+            $dateFormatted = $date->format('d/m/Y');
+            $timestamp = $date->getTimestamp();
+
+            if (!isset($stats[$dateFormatted])) {
+                $stats[$dateFormatted] = [
+                    'somme' => 0,
+                    'nombre' => 0,
+                    'timestamp' => $timestamp
+                ];
+            }
+            $stats[$dateFormatted]['somme'] += $diagnostic->getTotalStress();
+            $stats[$dateFormatted]['nombre']++;
+            $timestamps[$dateFormatted] = $timestamp;
+        }
+
+        $moyennes = [];
+        foreach ($stats as $date => $data) {
+            $moyennes[$date] = $data['somme'] / $data['nombre'];
+            $moyenneGenerale[] = $data['somme'];
+        }
+
+        $moyenneGeneraleGlobale = count($moyenneGenerale) > 0 ? array_sum($moyenneGenerale) / count($stats) : 0;
+
+        array_multisort($timestamps, SORT_ASC, $moyennes);
+
+        return [
+            'labels' => array_keys($moyennes),
+            'data' => array_values($moyennes),
+            'moyenneGenerale' => $moyenneGeneraleGlobale
+        ];
     }
 }
