@@ -17,14 +17,16 @@
         {{ form_row(form.username) }}
         {{ form_row(form.email) }}
         <div>
-            {{ form_label(form.password) }}
-            <div class="password-container">
-                {{ form_widget(form.password) }}
-                <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
-                    <i class="fas fa-eye" style="color: #ffc107"></i>
-                </button>
+            <div class="profile-field">
+                {{ form_label(form.password) }}
+                <div class="password-container">
+                    {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                    <button type="button" class="toggle-password" aria-label="Afficher le mot de passe">
+                        <i class="fas fa-eye" style="color: #ffc107"></i>
+                    </button>
+                </div>
+                {{ form_errors(form.password) }}
             </div>
-            {{ form_errors(form.password) }}
             <div class="password-strength-meter">
                 <div class="strength-bar">
                     <div class="strength-progress"></div>
