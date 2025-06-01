@@ -19,13 +19,16 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class DiagnosticController extends AbstractController
 {
     private DiagnosticRepository $diagnosticRepository;
+    private EntityManagerInterface $em;
 
     public function __construct
     (
-        DiagnosticRepository $diagnosticRepository
+        DiagnosticRepository $diagnosticRepository,
+        EntityManagerInterface $em
     )
     {
         $this->diagnosticRepository = $diagnosticRepository;
+        $this->em = $em;
     }
 
     #[Route('/', name: 'app_diagnostic_index', methods: ['GET', 'POST'])]
@@ -114,6 +117,14 @@ class DiagnosticController extends AbstractController
 
         $action = $this->generateUrl('app_diagnostic_new_user');
 
+        if ($this->isGranted('ROLE_ADMIN')) {
+            dump('Utilisateur est un admin');
+            $dataRedirect = $this->generateUrl('app_admin_dashboard');
+        } else {
+            dump('Utilisateur est un user');
+            $dataRedirect = $this->generateUrl('app_diagnostic_dashboard');
+        }
+
         try {
             if ($form->isSubmitted() && $form->isValid()) {
                 // Créer le diagnostic
@@ -140,9 +151,8 @@ class DiagnosticController extends AbstractController
                 $entityManager->flush();
 
                 $this->addFlash('sucess', 'Diagnostic créé avec succès.');
-
-                return $this->redirectToRoute('app_diagnostic_dashboard');
             }
+
         } catch (\Exception $e) {
             $this->addFlash('error', 'Une erreur est survenue lors de la création du diagnostic.');
             return $this->redirectToRoute('app_diagnostic_index');
@@ -150,7 +160,8 @@ class DiagnosticController extends AbstractController
 
         return $this->render('Diagnostic/new.html.twig', [
             'form' => $form->createView(),
-            'action' => $action
+            'action' => $action,
+            'dataRedirect' => $dataRedirect
         ]);
     }
 
@@ -191,27 +202,6 @@ class DiagnosticController extends AbstractController
         return $this->render('Diagnostic/show.html.twig', [
             'diagnostic' => $diagnostic,
         ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_diagnostic_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Diagnostic $diagnostic, EntityManagerInterface $entityManager): Response
-    {
-        // Logique pour modifier un diagnostic
-
-        return $this->render('Diagnostic/edit.html.twig', [
-            'diagnostic' => $diagnostic,
-        ]);
-    }
-
-    #[Route('/{id}', name: 'app_diagnostic_delete', methods: ['POST'])]
-    public function delete(Request $request, Diagnostic $diagnostic, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$diagnostic->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($diagnostic);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_diagnostic_index');
     }
 
     public function getFacteurStress(array $diagnostics)
@@ -273,5 +263,41 @@ class DiagnosticController extends AbstractController
             'data' => array_values($moyennes),
             'moyenneGenerale' => $moyenneGeneraleGlobale
         ];
+    }
+
+    #[Route('{id}/confirm-delete', name: 'app_confirm_delete_diagnostic')]
+    public function confirmDeleteDiagnostic(Diagnostic $diagnostic)
+    {
+        return $this->render('Diagnostic/confirmDeleteDiagnostic.html.twig', [
+            'diagnostic' => $diagnostic,
+        ]);
+    }
+
+    #[Route('{id}/delete', name: 'app_delete_diagnostic', methods: ['GET', 'POST'])]
+    public function deleteDiagnostic(Diagnostic $diagnostic)
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $action = $this->generateUrl('app_admin_dashboard');
+        } else {
+            $action = $this->generateUrl('app_diagnostic_dashboard');
+        }
+
+        try {
+            $this->em->remove($diagnostic);
+            $this->em->flush();
+
+            return $this->render('succesModal.html.twig', [
+                'titre' => 'Suppression réussie',
+                'btn' => 'Retour au tableau de bord',
+                'action' => $action,
+            ]);
+        } catch (\Exception $e) {
+            return $this->render('errorModal.html.twig', [
+                'titre' => 'Erreur de suppression',
+                'message' => 'Une erreur est survenue lors de la suppression.' . $e->getMessage(),
+                'btn' => 'Retour au tableau de bord',
+                'action' => $action,
+            ]);
+        }
     }
 }

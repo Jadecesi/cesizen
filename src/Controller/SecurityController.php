@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class SecurityController extends AbstractController
 {
@@ -44,7 +45,15 @@ class SecurityController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
         if ($error) {
-            $this->addFlash('error', 'Identifiants incorrects.');
+            $errorMessage = match ($error->getMessageKey()) {
+                'Invalid credentials.' => 'Identifiants invalides',
+                'The presented password is invalid.' => 'Le mot de passe est incorrect',
+                'Username could not be found.' => 'Cet email n\'est pas enregistré',
+                'Account is disabled.' => 'Votre compte est désactivé',
+                default => $error->getMessage(),
+            };
+
+            $this->addFlash('error', $errorMessage);
         }
 
         return $this->render('Security/login.html.twig', [
@@ -59,7 +68,18 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/signup', name: 'app_signup')]
-    public function signup(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UtilisateurRepository $utilisateurRepository, RoleRepository $roleRepository, UserPasswordHasherInterface $userPasswordHasher, AuthentificationAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
+    public function signup
+    (
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher,
+        UtilisateurRepository $utilisateurRepository,
+        RoleRepository $roleRepository,
+        UserPasswordHasherInterface $userPasswordHasher,
+        AuthentificationAuthenticator $authenticator,
+        UserAuthenticatorInterface $userAuthenticator,
+        ValidatorInterface $validator
+    ): Response {
 
         $form = $this->createForm(SignupType::class);
         $form->handleRequest($request);
@@ -86,6 +106,8 @@ class SecurityController extends AbstractController
             }
 
             $role = $roleRepository->findOneBy(['nom' => 'ROLE_USER']);
+
+
 
             $utilisateur = new Utilisateur();
             $utilisateur->setPrenom($user['prenom']);
@@ -122,11 +144,7 @@ class SecurityController extends AbstractController
                 $utilisateur->setPhotoProfile('default.png');
             }
 
-            // Hashage du mot de passe
-            $hashedPassword = $passwordHasher->hashPassword($utilisateur, $form->get('password')->getData());
-            $utilisateur->setPassword($hashedPassword);
 
-            dump($utilisateur);
             $entityManager->persist($utilisateur);
             $entityManager->flush();
 
@@ -137,6 +155,11 @@ class SecurityController extends AbstractController
                 $authenticator,
                 $request
             );
+        } else {
+            $errors = $form->getErrors(true);
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('Security/signup.html.twig', [

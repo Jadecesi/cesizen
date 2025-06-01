@@ -25,6 +25,20 @@
                 </button>
             </div>
             {{ form_errors(form.password) }}
+            <div class="password-strength-meter">
+                <div class="strength-bar">
+                    <div class="strength-progress"></div>
+                </div>
+                <div class="strength-label">Force du mot de passe: <span>Faible</span></div>
+                <div class="requirements">Exigences:</div>
+                <ul class="password-requirements">
+                    <li data-requirement="length">Au moins 8 caractères</li>
+                    <li data-requirement="uppercase">Au moins une majuscule</li>
+                    <li data-requirement="lowercase">Au moins une minuscule</li>
+                    <li data-requirement="number">Au moins un chiffre</li>
+                    <li data-requirement="special">Au moins un caractère spécial (@$!%*?&)</li>
+                </ul>
+            </div>
         </div>
         <div>
             {{ form_label(form.confirmPassword) }}
@@ -56,5 +70,91 @@
 {% endblock %}
 
 {% block js_modal %}
-    <script src="{{ asset('/js/showPassword.js') }}"></script>
+    <script>
+        function passwordCheck() {
+            const strengthBar = document.querySelector('.strength-progress');
+            const strengthLabel = document.querySelector('.strength-label');
+            const passwordField = document.querySelector('[name="signup[password]"]');
+            const requirementsTitle = document.querySelector('.requirements');
+
+            const requirements = {
+                length: password => password.length >= 8,
+                uppercase: password => /[A-Z]/.test(password),
+                lowercase: password => /[a-z]/.test(password),
+                number: password => /[0-9]/.test(password),
+                special: password => /[@$!%*?&]/.test(password)
+            };
+
+            if (passwordField) {
+                passwordField.addEventListener('input', function () {
+                    const password = this.value;
+                    let validCount = 0;
+                    let visibleRequirements = 0;
+
+                    Object.keys(requirements).forEach(requirement => {
+                        const element = document.querySelector(`[data-requirement="${requirement}"]`);
+                        if (element && requirements[requirement](password)) {
+                            element.style.display = 'none';
+                            validCount++;
+                        } else if (element) {
+                            element.style.display = 'flex';
+                            visibleRequirements++;
+                        }
+                    });
+
+                    // Gestion du titre des exigences
+                    if (requirementsTitle) {
+                        requirementsTitle.style.display = visibleRequirements === 0 ? 'none' : 'block';
+                    }
+
+                    if (strengthBar && strengthLabel) {
+                        strengthBar.classList.remove('weak', 'medium', 'strong');
+                        strengthLabel.classList.remove('weak', 'medium', 'strong');
+
+                        if (validCount <= 2) {
+                            strengthBar.classList.add('weak');
+                            strengthLabel.classList.add('weak');
+                            strengthLabel.querySelector('span').textContent = 'Faible';
+                        } else if (validCount <= 4) {
+                            strengthBar.classList.add('medium');
+                            strengthLabel.classList.add('medium');
+                            strengthLabel.querySelector('span').textContent = 'Moyen';
+                        } else {
+                            strengthBar.classList.add('strong');
+                            strengthLabel.classList.add('strong');
+                            strengthLabel.querySelector('span').textContent = 'Fort';
+                        }
+                    }
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", passwordCheck);
+        document.addEventListener("modalContentLoaded", passwordCheck);
+    </script>
+    <script>
+        function initPasswordToggle() {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('input');
+                    const icon = this.querySelector('i');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", initPasswordToggle);
+        document.addEventListener("modalContentLoaded", initPasswordToggle);
+    </script>
 {% endblock %}

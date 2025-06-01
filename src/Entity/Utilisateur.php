@@ -19,7 +19,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['api_user'])]
+    #[Groups(['api_user', 'api_diagnostic'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
@@ -41,7 +41,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Diagnostic>
      */
-    #[ORM\OneToMany(targetEntity: Diagnostic::class, mappedBy: 'utilisateur')]
+    #[ORM\OneToMany(targetEntity: Diagnostic::class, mappedBy: 'utilisateur', cascade: ['remove'])]
     #[Groups(['api_user'])]
     private Collection $diagnostics;
 
@@ -81,7 +81,11 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $tokenExpiresAt = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['api_user'])]
     private ?bool $isActif = null; //Actif = 1 désactivé = 0
+
+    #[ORM\OneToMany(targetEntity: ResetPassword::class, mappedBy: 'user', cascade: ['remove'])]
+    private Collection $resetPasswords;
 
     public function __construct()
     {
@@ -89,6 +93,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->contenus = new ArrayCollection();
         $this->role = new Role();
         $this->role->setNom('ROLE_USER');
+        $this->resetPasswords = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -327,5 +332,32 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->dateNaissance
             ->diff(new \DateTime())
             ->y;
+    }
+
+    public function getResetPasswords(): Collection
+    {
+        return $this->resetPasswords;
+    }
+
+    public function addResetPassword(ResetPassword $resetPassword): static
+    {
+        if (!$this->resetPasswords->contains($resetPassword)) {
+            $this->resetPasswords->add($resetPassword);
+            $resetPassword->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeResetPassword(ResetPassword $resetPassword): static
+    {
+        if ($this->resetPasswords->removeElement($resetPassword)) {
+            // set the owning side to null (unless already changed)
+            if ($resetPassword->getUser() === $this) {
+                $resetPassword->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

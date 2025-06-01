@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Test API{% endblock %}
+
+{% block body %}
+    <h2 class="text-center mt-4">Test API</h2>
+        <main class="main-content">
+        <div class="api-test-container">
+            <div class="api-form">
+                <div class="endpoint-selector">
+                    <label for="endpointSelect">Sélectionner un endpoint :</label>
+                    <select id="endpointSelect" onchange="updateEndpoint()">
+                        <option value="">Sélectionner...</option>
+                        <optgroup label="Contenus">
+                            <option value="GET:/api/contenus">GET: Liste des contenus</option>
+                            <option value="GET:/api/contenu/{id}">GET: Contenu par ID</option>
+                            <option value="POST:/api/contenus/new">POST: Créer un contenu</option>
+                        </optgroup>
+                        <optgroup label="Diagnostics">
+                            <option value="GET:/api/diagnostic">GET: Liste des diagnostics</option>
+                            <option value="GET:/api/diagnostic/{id}">GET: Diagnostic par ID</option>
+                            <option value="POST:/api/diagnostic/new-user">POST: Nouveau diagnostic</option>
+                            <option value="GET:/api/diagnostic/user/{id}">GET: Diagnostics par utilisateur</option>
+                        </optgroup>
+                        <optgroup label="Événements">
+                            <option value="GET:/api/events">GET: Liste des événements</option>
+                        </optgroup>
+                        <optgroup label="Authentification">
+                            <option value="POST:/api/login">POST: Connexion</option>
+                            <option value="POST:/api/logout">POST: Déconnexion</option>
+                        </optgroup>
+                        <optgroup label="Utilisateurs">
+                            <option value="GET:/api/users">GET: Liste des utilisateurs</option>
+                            <option value="GET:/api/user/{id}">GET: Utilisateur par ID</option>
+                    </select>
+                </div>
+
+                <select id="httpMethod">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+
+                <input type="text" id="apiUrl" placeholder="URL de l'API" value="{{ app.request.schemeAndHttpHost }}/api/">
+
+                <div class="param-container" id="paramContainer" style="display: none;">
+                    <label for="paramValue">ID</label>
+                    <input type="text" id="paramValue" placeholder="Entrez l'ID">
+                </div>
+
+                <textarea id="requestBody" placeholder="Corps de la requête (JSON)" rows="5"></textarea>
+                <button onclick="sendRequest()" class="button new-diagnostic-btn">Envoyer</button>
+            </div>
+            <div class="api-response">
+                <h3>Réponse</h3>
+                <pre id="response" style="text-align: left;"></pre>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .api-test-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .api-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .endpoint-selector {
+            margin-bottom: 10px;
+        }
+
+        #endpointSelect, #httpMethod {
+            width: 100%;
+            padding: 8px;
+        }
+
+        #apiUrl {
+            width: 100%;
+            padding: 8px;
+        }
+
+        .param-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #requestBody {
+            width: 100%;
+            font-family: monospace;
+        }
+
+        .api-response {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        #response {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        const userToken = {% if app.user and app.user.apiToken %}'{{ app.user.apiToken }}'{% else %}null{% endif %};
+
+        function updateEndpoint() {
+            const select = document.getElementById('endpointSelect');
+            const [method, path] = select.value.split(':');
+            const baseUrl = '{{ app.request.schemeAndHttpHost }}';
+
+            document.getElementById('httpMethod').value = method;
+            document.getElementById('apiUrl').value = baseUrl + path;
+
+            const paramContainer = document.getElementById('paramContainer');
+            const requestBody = document.getElementById('requestBody');
+
+            if (path.includes('{id}')) {
+                paramContainer.style.display = 'flex';
+            } else {
+                paramContainer.style.display = 'none';
+            }
+
+            // Exemples de corps de requête
+            switch(path) {
+                case '/api/contenus/new':
+                    requestBody.value = JSON.stringify({
+                        titre: "Titre du contenu",
+                        image: "https://exemple.com/image.jpg",
+                        description: "Description du contenu",
+                        url: "https://exemple.com"
+                    }, null, 2);
+                    break;
+                case '/api/diagnostic/new-user':
+                    requestBody.value = JSON.stringify({
+                        utilisateur_id: {% if app.user %}{{ app.user.id }}{% else %}0{% endif %},
+                        selected_events: []
+                    }, null, 2);
+                    break;
+                default:
+                    requestBody.value = '';
+            }
+        }
+
+        async function sendRequest() {
+            const method = document.getElementById('httpMethod').value;
+            let url = document.getElementById('apiUrl').value;
+            const body = document.getElementById('requestBody').value;
+            const responseElement = document.getElementById('response');
+            const paramValue = document.getElementById('paramValue').value;
+
+            if (url.includes('{id}')) {
+                url = url.replace('{id}', paramValue);
+            }
+
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+
+                if (userToken) {
+                    options.headers['Authorization'] = `Bearer ${userToken}`;
+                }
+
+                if (method !== 'GET' && body) {
+                    options.body = body;
+                }
+
+                const response = await fetch(url, options);
+                const data = await response.json();
+
+                responseElement.innerHTML = JSON.stringify(data, null, 2);
+                responseElement.style.color = response.ok ? 'green' : 'red';
+            } catch (error) {
+                responseElement.innerHTML = 'Erreur: ' + error.message;
+                responseElement.style.color = 'red';
+            }
+        }
+    </script>
+{% endblock %}

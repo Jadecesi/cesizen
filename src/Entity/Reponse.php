@@ -6,15 +6,16 @@ use App\Repository\ReponseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: ReponseRepository::class)]
-#[Broadcast]
 class Reponse
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['api_diagnostic', 'api_event'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'reponses')]
@@ -25,6 +26,7 @@ class Reponse
      * @var Collection<int, Event>
      */
     #[ORM\ManyToMany(targetEntity: Event::class, inversedBy: 'reponses')]
+    #[Groups(['api_diagnostic'])]
     private Collection $events;
 
     public function __construct()

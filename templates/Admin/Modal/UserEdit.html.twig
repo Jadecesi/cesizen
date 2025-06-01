@@ -6,7 +6,6 @@
     {% include 'part/addFlash.html.twig' %}
 {% endblock %}
 
-
 {% block modal_content %}
     <div class="profile-picture">
         {% if app.user.photoProfile %}
@@ -48,9 +47,12 @@
         {{ form_errors(form.username) }}
     </div>
 
-    <div class="profile-field">
+    <div class="profile-field api-token-container">
         {{ form_label(form.apiToken) }}
-        {{ form_widget(form.apiToken) }}
+        <div class="token-input-group">
+            {{ form_widget(form.apiToken) }}
+            <button type="button" onclick="generateApiToken()" class="button btn-success-modal">Générer</button>
+        </div>
         {{ form_errors(form.apiToken) }}
     </div>
 
@@ -71,6 +73,47 @@
     </div>
 
     {{ form_end(form) }}
+{% endblock %}
+
+{% block js_modal %}
+    <script>
+        function generateApiToken() {
+            const tokenField = document.querySelector('[name="utilisateur[apiToken]"]');
+            const expirationField = document.querySelector('[name="utilisateur[tokenExpiresAt]"]');
+
+            // Fonction pour générer un UUID v4
+            function uuidv4() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0,
+                        v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+
+            // Fonction pour générer des bytes aléatoires
+            function generateRandomBytes(length) {
+                const chars = '0123456789abcdef';
+                let result = '';
+                for (let i = 0; i < length * 2; i++) {
+                    result += chars[Math.floor(Math.random() * chars.length)];
+                }
+                return result;
+            }
+
+            // Générer le token
+            const uuid = uuidv4();
+            const randomBytes = generateRandomBytes(32);
+            tokenField.value = uuid + randomBytes;
+
+            // Mettre à jour la date d'expiration
+            if (expirationField) {
+                const expirationDate = new Date();
+                expirationDate.setDate(expirationDate.getDate() + 7);
+                const formattedDate = expirationDate.toISOString().split('T')[0];
+                expirationField.value = formattedDate;
+            }
+        }
+    </script>
 {% endblock %}
 
 

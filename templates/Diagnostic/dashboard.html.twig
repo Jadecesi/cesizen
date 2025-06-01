@@ -6,16 +6,6 @@
     <link rel="stylesheet" href="{{ asset('/css/dashboardAdmin.css') }}">
 {% endblock %}
 
-{#{% block navBarBtn %}#}
-{#    {% if is_granted('ROLE_USER') %}#}
-{#        <div class="admin-buttons-header">#}
-{#            <a href="{{ path('app_diagnostic_new_user') }}" class="button new-diagnostic-btn" data-target="modal">#}
-{#                <i class="fa-solid fa-plus"></i> Nouveau diagnostic#}
-{#            </a>#}
-{#        </div>#}
-{#    {% endif %}#}
-{#{% endblock %}#}
-
 {% block body %}
     {% if is_granted('ROLE_USER') %}
         {% if diagnostics is not empty %}
@@ -53,6 +43,7 @@
                             <th>Évènement de stress</th>
                             <th>Score</th>
                             <th>Commentaires</th>
+                            <th>Action</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -70,6 +61,9 @@
                                 </td>
                                 <td>{{ diagnostic.totalStress }}</td>
                                 <td>{{ diagnostic.getCommentaire(diagnostic.totalStress)|raw }}</td>
+                                <td>
+                                    <a href="{{ path('app_confirm_delete_diagnostic', {'id': diagnostic.id}) }}" class="col-4 fa-xl fa-solid fa-trash-can" style="color: #C60707" data-target="modal"></a>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>

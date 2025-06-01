@@ -17,7 +17,7 @@
             {% for contenu in contenus %}
                 <article class="content-card">
                     <div class="content-image">
-                        <img src="{{ asset('uploads/contenu/' ~ contenu.image) }}" alt="{{ contenu.titre }}">
+                        <img src="{% if 'http' in contenu.image %}{{ contenu.image }}{% else %}{{ asset('uploads/contenu/' ~ contenu.image) }}{% endif %}" alt="{{ contenu.titre }}">
                     </div>
                     <div class="content-info">
                         <h2>{{ contenu.titre }}</h2>

@@ -11,29 +11,32 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: DiagnosticRepository::class)]
-#[Broadcast]
 class Diagnostic
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['api_user'])]
+    #[Groups(['api_user', 'api_diagnostic'])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['api_diagnostic'])]
     private ?float $totalStress = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Groups(['api_diagnostic'])]
     private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\ManyToOne(inversedBy: 'diagnostics')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['api_diagnostic'])]
     private ?Utilisateur $utilisateur = null;
 
     /**
      * @var Collection<int, Reponse>
      */
-    #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'diagnostics')]
+    #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'diagnostics', cascade: ['remove'])]
+    #[Groups(['api_diagnostic'])]
     private Collection $reponses;
 
     public function __construct()

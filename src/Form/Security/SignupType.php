@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 
@@ -63,14 +64,20 @@ class SignupType extends AbstractType
                 'required' => true
             ]);
 
-        $builder->add('password', PasswordType::class,
-            [
-                'label' => 'Mot de passe',
-                'attr' => [
-                    'placeholder' => 'Mot de passe',
-                ],
-                'required' => true
-            ]);
+        $builder->add('password', PasswordType::class, [
+            'label' => 'Mot de passe',
+            'attr' => [
+                'placeholder' => 'Mot de passe',
+            ],
+            'required' => true,
+            'constraints' => [
+                new Assert\NotBlank(),
+                new Assert\Regex([
+                    'pattern' => '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
+                    'message' => 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial'
+                ])
+            ]
+        ]);
 
         $builder->add('confirmPassword', PasswordType::class,
             [

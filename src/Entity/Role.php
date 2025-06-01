@@ -10,7 +10,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: RoleRepository::class)]
-#[Broadcast]
 class Role
 {
     #[ORM\Id]

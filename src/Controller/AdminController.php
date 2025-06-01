@@ -35,16 +35,18 @@ class AdminController extends AbstractController
     #[Route('/dashboard', name: 'app_admin_dashboard')]
     public function dashboard(UtilisateurRepository $utilisateurRepository, DiagnosticRepository $diagnosticRepository, EventRepository $eventRepository)
     {
+        $user = $this->getUser();
         $utilisateur = $utilisateurRepository->findAll();
 
         $diagnostics = $diagnosticRepository->findAll();
+
+        $diagnosticsAdmin = $diagnosticRepository->findBy(['utilisateur' => $user]);
 
         $events = $eventRepository->findAll();
 
         $stressLevelStats = $this->getChartStressLevel($diagnostics);
         $evolutionStressByAge = $this->getChartEvolutionMoyenneStressByAge($diagnostics);
         $eventsByCategorie = $this->getChartEventsByCategorie($diagnostics);
-        // Nouvelle ligne pour obtenir les données des événements par catégorie et par âge
         $eventsByCategorieAndAge = $this->getChartEventsByCategorieAndAge($diagnostics);
 
         $chartDataStressLevel = [
@@ -76,6 +78,7 @@ class AdminController extends AbstractController
             'eventsByCategorie' => $chartDataEventsByCategorie,
             'eventsByCategorieAndAge' => $chartDataEventsByCategorieAndAge,  // Nouvelle variable
             'events' => $events,
+            'diagnosticAdmin' => $diagnosticsAdmin
         ]);
     }
 
@@ -87,7 +90,7 @@ class AdminController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $this->em->persist($utilisateur);
-            $this->em-->flush();
+            $this->em->flush();
         }
 
         return $this->render('Admin/Modal/UserEdit.html.twig', [
@@ -421,5 +424,11 @@ class AdminController extends AbstractController
             'btn' => 'Retour au tableau de bord',
             'action' => $this->generateUrl('app_admin_dashboard'),
         ]);
+    }
+
+    #[Route('/test', name: 'app_api_test')]
+    public function testApi(): Response
+    {
+        return $this->render('Api/testApi.html.twig');
     }
 }

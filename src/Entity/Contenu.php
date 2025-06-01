@@ -9,7 +9,6 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: ContenuRepository::class)]
-#[Broadcast]
 class Contenu
 {
     #[ORM\Id]
@@ -27,10 +26,12 @@ class Contenu
     private ?string $image = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['api_contenu'])]
     private ?\DateTimeInterface $dateModification = null;
 
     #[ORM\ManyToOne(inversedBy: 'contenus')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['api_contenu'])]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]

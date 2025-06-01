@@ -1,0 +1,16 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}Suppression le diagnostic en date du : {{ diagnostic.dateCreation|date('d/m/Y') }}{% endblock %}
+
+{% block modal_content %}
+    <h3>Êtes-vous sûr de vouloir supprimer ce diagnostic de stress ?</h3>
+    <br>
+    <div class="modal--actions">
+        <button type="button"
+                data-redirect="{{ path('app_delete_diagnostic', {'id': diagnostic.id}) }}"
+                class="btn btn-danger btn-lg modalImbriquer"
+                data-target="modal">
+            Supprimer
+        </button>
+    </div>
+{% endblock %}

@@ -3,6 +3,7 @@ namespace App\Security;
 
 use App\Entity\Utilisateur;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Core\Exception\UserNotFoundException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -26,6 +27,10 @@ class UserProvider implements UserProviderInterface
 
         if (!$user) {
             throw new UserNotFoundException(sprintf('Utilisateur "%s" non trouvé.', $identifier));
+        }
+
+        if (!$user->isActif()) {
+            throw new CustomUserMessageAccountStatusException('Compte désactivé.');
         }
 
         return $user;

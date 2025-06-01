@@ -6,21 +6,24 @@ use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
-#[Broadcast]
 class Event
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['api_diagnostic', 'api_event'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['api_event', 'api_diagnostic'])]
     private ?string $nom = null;
 
     #[ORM\Column]
+    #[Groups(['api_event'])]
     private ?int $stress = null;
 
     /**

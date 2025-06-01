@@ -1148,6 +1148,7 @@ tbody tr:nth-child(odd) {
     background-color: rgba(220, 53, 69, 0.15) !important; /* Lighter red with opacity */
 }
 
+.danger-btn,
 .btn-reset-password {
     background-color: #dc3545; /* Couleur rouge de Bootstrap */
     color: white;
@@ -1156,4 +1157,18 @@ tbody tr:nth-child(odd) {
 .btn-reset-password:hover {
     background-color: #bb2d3b; /* Version plus foncée au survol */
     color: white;
+}
+
+.token-input-group {
+ display: flex;
+ gap: 10px;
+ align-items: flex-start;
+}
+
+.api-token-field {
+    flex: 1;
+}
+
+.generate-token-btn {
+    white-space: nowrap;
 }

@@ -18,6 +18,7 @@ security:
             pattern: ^/api
             stateless: true
             provider: app_user_provider
+            user_checker: security.user_checker
             custom_authenticators:
                 - App\Security\ApiTokenAuthenticator
 
@@ -31,6 +32,7 @@ security:
                 check_path: app_login
                 username_parameter: _username
                 password_parameter: _password
+            user_checker: security.user_checker
 
             logout:
                 path: app_logout
@@ -40,8 +42,9 @@ security:
                 path: /
 
     access_control:
-        - { path: ^/diagnostic/.*user.*, roles: ROLE_USER }
-        - { path: ^/.*user.*, roles: ROLE_USER }
+        - { path: ^/api/user/.*, roles: ROLE_USER }
+        - { path: ^/diagnostic/.*user.*, roles: PUBLIC_ACCESS }
+        - { path: ^/.*user.*, roles: PUBLIC_ACCESS }
         - { path: ^/.*admin.*, roles: ROLE_ADMIN }
         - { path: ^/api/contenus, roles: PUBLIC_ACCESS }
 
