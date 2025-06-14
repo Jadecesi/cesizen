@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Diagnostic;
-use App\Entity\Reponse;
 use App\Form\QuestionnaireType;
 use App\Repository\CategorieEventRepository;
 use App\Repository\DiagnosticRepository;
@@ -132,14 +131,10 @@ class DiagnosticController extends AbstractController
                 $diagnostic->setUtilisateur($this->getUser());
                 $entityManager->persist($diagnostic);
 
-                // Créer la réponse et lier le diagnostic
-                $reponse = new Reponse();
-                $reponse->setDiagnostics($diagnostic);
-
                 // Ajouter chaque événement sélectionné
                 $selectedEvents = $form->get('events')->getData();
                 foreach ($selectedEvents as $event) {
-                    $reponse->addEvent($event);
+                    $diagnostic->addEvent($event);
                     $stress[] = $event->getStress();
                 }
 
@@ -147,7 +142,6 @@ class DiagnosticController extends AbstractController
                 $totalStress = array_sum($stress);
                 $diagnostic->setTotalStress($totalStress);
 
-                $entityManager->persist($reponse);
                 $entityManager->flush();
 
                 $this->addFlash('sucess', 'Diagnostic créé avec succès.');
@@ -208,11 +202,9 @@ class DiagnosticController extends AbstractController
     {
         $stats = [];
         foreach ($diagnostics as $diagnostic) {
-            foreach ($diagnostic->getReponses() as $reponse) {
-                foreach ($reponse->getEvents() as $event) {
-                    $label = $event->getNom();
-                    $stats[$label] = ($stats[$label] ?? 0) + 1;
-                }
+            foreach ($diagnostic->getEvents() as $event) {
+                $label = $event->getNom();
+                $stats[$label] = ($stats[$label] ?? 0) + 1;
             }
         }
         arsort($stats);

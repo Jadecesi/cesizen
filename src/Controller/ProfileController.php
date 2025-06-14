@@ -61,6 +61,7 @@ class ProfileController extends AbstractController
 
                     return $this->render('User/profile.html.twig', [
                         'form' => $form->createView(),
+                        'utilisateur' => $user,
                     ]);
                 }
             }
@@ -80,6 +81,7 @@ class ProfileController extends AbstractController
 
                 return $this->render('User/profile.html.twig', [
                     'form' => $form->createView(),
+                    'utilisateur' => $user,
                 ]);
             }
 

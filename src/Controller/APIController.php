@@ -4,8 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Contenu;
 use App\Entity\Diagnostic;
-use App\Entity\Event;
-use App\Entity\Reponse;
 use App\Entity\Utilisateur;
 use App\Repository\ContenuRepository;
 use App\Repository\DiagnosticRepository;
@@ -248,10 +246,6 @@ class APIController extends AbstractController
             $diagnostic->setUtilisateur($utilisateur);
             $diagnostic->setDateCreation(new \DateTimeImmutable());
 
-            // Créer la réponse
-            $reponse = new Reponse();
-            $reponse->setDiagnostics($diagnostic);
-
             // Ajouter les événements
             $stress = 0;
             foreach ($data['selected_events'] as $eventId) {
@@ -259,7 +253,7 @@ class APIController extends AbstractController
                 if (!$event) {
                     return $this->json(['error' => 'Événement non trouvé: ' . $eventId], 404);
                 }
-                $reponse->addEvent($event);
+                $diagnostic->addEvent($event);
                 $stress += $event->getStress();
             }
 
@@ -267,7 +261,6 @@ class APIController extends AbstractController
 
             // Persister les entités
             $this->em->persist($diagnostic);
-            $this->em->persist($reponse);
             $this->em->flush();
 
             return $this->json($diagnostic, 201, [], ['groups' => 'api_diagnostic']);

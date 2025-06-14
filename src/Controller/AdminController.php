@@ -190,11 +190,9 @@ class AdminController extends AbstractController
         $categoryStats = [];
 
         foreach ($diagnostics as $diagnostic) {
-            foreach ($diagnostic->getReponses() as $reponse) {
-                foreach ($reponse->getEvents() as $event) {
-                    $categoryName = $event->getCategorie()->getLibelle();
-                    $categoryStats[$categoryName] = ($categoryStats[$categoryName] ?? 0) + 1;
-                }
+            foreach ($diagnostic->getEvents() as $event) {
+                $categoryName = $event->getCategorie()->getLibelle();
+                $categoryStats[$categoryName] = ($categoryStats[$categoryName] ?? 0) + 1;
             }
         }
 
@@ -219,21 +217,19 @@ class AdminController extends AbstractController
                 $eventsByAgeAndCategory[$age] = [];
             }
 
-            foreach ($diagnostic->getReponses() as $reponse) {
-                foreach ($reponse->getEvents() as $event) {
-                    $categoryName = $event->getCategorie()->getLibelle();
+            foreach ($diagnostic->getEvents() as $event) {
+                $categoryName = $event->getCategorie()->getLibelle();
 
-                    // Ajouter la catégorie à notre liste de catégories uniques
-                    if (!in_array($categoryName, $categories)) {
-                        $categories[] = $categoryName;
-                    }
-
-                    // Incrémenter le compteur pour cette catégorie à cet âge
-                    if (!isset($eventsByAgeAndCategory[$age][$categoryName])) {
-                        $eventsByAgeAndCategory[$age][$categoryName] = 0;
-                    }
-                    $eventsByAgeAndCategory[$age][$categoryName]++;
+                // Ajouter la catégorie à notre liste de catégories uniques
+                if (!in_array($categoryName, $categories)) {
+                    $categories[] = $categoryName;
                 }
+
+                // Incrémenter le compteur pour cette catégorie à cet âge
+                if (!isset($eventsByAgeAndCategory[$age][$categoryName])) {
+                    $eventsByAgeAndCategory[$age][$categoryName] = 0;
+                }
+                $eventsByAgeAndCategory[$age][$categoryName]++;
             }
         }
 

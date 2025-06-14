@@ -161,17 +161,19 @@
                             <td>{{ diagnostic.dateCreation|date('d/m/Y') }}</td>
                             <td>
                                 <ul>
-                                    {% for reponse in diagnostic.reponses %}
-                                        {% for event in reponse.events %}
-                                            <li>{{ event.nom }}</li>
-                                        {% endfor %}
+                                    {% for event in diagnostic.events %}
+                                        <li>{{ event.nom }}</li>
                                     {% endfor %}
                                 </ul>
                             </td>
                             <td>{{ diagnostic.totalStress }}</td>
                             <td>{{ diagnostic.getCommentaire(diagnostic.totalStress)|raw }}</td>
                             <td>
-                                <a href="{{ path('app_confirm_delete_diagnostic', {'id': diagnostic.id}) }}" class="col-4 fa-xl fa-solid fa-trash-can" style="color: #C60707" data-target="modal"></a>
+                                <a href="{{ path('app_confirm_delete_diagnostic', {'id': diagnostic.id}) }}"
+                                   class="col-4 fa-xl fa-solid fa-trash-can"
+                                   style="color: #C60707"
+                                   data-target="modal">
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}

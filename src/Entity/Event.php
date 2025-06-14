@@ -26,18 +26,16 @@ class Event
     #[Groups(['api_event'])]
     private ?int $stress = null;
 
-    /**
-     * @var Collection<int, Reponse>
-     */
-    #[ORM\ManyToMany(targetEntity: Reponse::class, mappedBy: 'events')]
-    private Collection $reponses;
+    #[ORM\ManyToMany(targetEntity: Diagnostic::class, mappedBy: 'events')]
+    #[Groups(['api_event'])]
+    private Collection $diagnostics;
 
     #[ORM\ManyToOne(inversedBy: 'events')]
     private ?CategorieEvent $categorie = null;
 
     public function __construct()
     {
-        $this->reponses = new ArrayCollection();
+        $this->diagnostics = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -70,29 +68,24 @@ class Event
     }
 
     /**
-     * @return Collection<int, Reponse>
+     * @return Collection<int, Diagnostic>
      */
-    public function getReponses(): Collection
+    public function getDiagnostics(): Collection
     {
-        return $this->reponses;
+        return $this->diagnostics;
     }
 
-    public function addReponse(Reponse $reponse): static
+    public function addDiagnostic(Diagnostic $diagnostic): static
     {
-        if (!$this->reponses->contains($reponse)) {
-            $this->reponses->add($reponse);
-            $reponse->addEvent($this);
+        if (!$this->diagnostics->contains($diagnostic)) {
+            $this->diagnostics->add($diagnostic);
         }
-
         return $this;
     }
 
-    public function removeReponse(Reponse $reponse): static
+    public function removeDiagnostic(Diagnostic $diagnostic): static
     {
-        if ($this->reponses->removeElement($reponse)) {
-            $reponse->removeEvent($this);
-        }
-
+        $this->diagnostics->removeElement($diagnostic);
         return $this;
     }
 

@@ -32,16 +32,13 @@ class Diagnostic
     #[Groups(['api_diagnostic'])]
     private ?Utilisateur $utilisateur = null;
 
-    /**
-     * @var Collection<int, Reponse>
-     */
-    #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'diagnostics', cascade: ['remove'])]
+    #[ORM\ManyToMany(targetEntity: Event::class, inversedBy: 'diagnostics')]
     #[Groups(['api_diagnostic'])]
-    private Collection $reponses;
+    private Collection $events;
 
     public function __construct()
     {
-        $this->reponses = new ArrayCollection();
+        $this->events = new ArrayCollection();
         $this->dateCreation = new \DateTime();
     }
 
@@ -89,32 +86,27 @@ class Diagnostic
     }
 
     /**
-     * @return Collection<int, Reponse>
+     * @return Collection<int, Event>
      */
-    public function getReponses(): Collection
+    public function getEvents(): Collection
     {
-        return $this->reponses;
+        return $this->events;
     }
 
-    public function addReponse(Reponse $reponse): static
+    public function addEvent(Event $event): static
     {
-        if (!$this->reponses->contains($reponse)) {
-            $this->reponses->add($reponse);
-            $reponse->setDiagnostics($this);
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+            $event->addDiagnostic($this);
         }
-
         return $this;
     }
 
-    public function removeReponse(Reponse $reponse): static
+    public function removeEvent(Event $event): static
     {
-        if ($this->reponses->removeElement($reponse)) {
-            // set the owning side to null (unless already changed)
-            if ($reponse->getDiagnostics() === $this) {
-                $reponse->setDiagnostics(null);
-            }
+        if ($this->events->removeElement($event)) {
+            $event->removeDiagnostic($this);
         }
-
         return $this;
     }
 
