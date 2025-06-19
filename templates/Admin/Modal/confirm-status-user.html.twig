@@ -1,0 +1,16 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}{{ action|capitalize }} le compte utilisateur{% endblock %}
+
+{% block modal_content %}
+    <h3>Êtes-vous sûr de vouloir {{ action }} cet utilisateur ?</h3>
+    <br>
+    <div class="modal--actions">
+        <button type="button"
+                data-redirect="{{ path('app_modifie_status_user', {'id': user.id}) }}"
+                class="btn btn-{{ user.isActif ? 'danger' : 'success' }} btn-lg modalImbriquer"
+                data-target="modal">
+            {{ action }}
+        </button>
+    </div>
+{% endblock %}

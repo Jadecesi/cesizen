@@ -3,16 +3,7 @@
 {% block modal_title %}Ajout d'un contenu{% endblock %}
 
 {% block modal_message_flash %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">
-            {{ message }}
-        </div>
-    {% endfor %}
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">
-            {{ message }}
-        </div>
-    {% endfor %}
+    {% include 'part/addFlash.html.twig' %}
 {% endblock %}
 
 {% block modal_content %}

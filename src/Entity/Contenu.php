@@ -9,13 +9,12 @@ use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: ContenuRepository::class)]
-#[Broadcast]
 class Contenu
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['api_contenu'])]
+    #[Groups(['api_contenu', 'api_user'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -27,10 +26,12 @@ class Contenu
     private ?string $image = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Groups(['api_contenu'])]
     private ?\DateTimeInterface $dateModification = null;
 
     #[ORM\ManyToOne(inversedBy: 'contenus')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['api_contenu'])]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -46,7 +47,7 @@ class Contenu
 
     public function __construct()
     {
-        $this->dateCreation = new \DateTime('now');
+        $this->dateCreation = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
     }
 
     public function getId(): ?int
@@ -85,7 +86,7 @@ class Contenu
 
     public function setDateModification(): static
     {
-        $dateModification = new \DateTime('now');
+        $dateModification = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
         $this->dateModification = $dateModification;
 
         return $this;

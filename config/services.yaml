@@ -9,6 +9,9 @@ parameters:
 
 
 services:
+    App\Security\UserChecker:
+        tags:
+            - { name: 'security.user_checker' }
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.

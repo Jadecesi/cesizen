@@ -35,8 +35,7 @@ class CustomModal {
 
     handleClick = async (e) => {
         if (e.defaultPrevented) return;
-        e.preventDefault();
-        console.log("Valeur de `this` dans handleClick :", this); // 🔍 Vérifier ce que `this` contient
+        e.preventDefault();// 🔍 Vérifier ce que `this` contient
         await this.loadContentInModal(e.target.getAttribute('href'));
     };
 
@@ -136,8 +135,6 @@ class CustomModal {
 
             const result = await response.text();
 
-            console.log(result);
-
             this.setContent(result);
 
             const hasSuccess = result.includes('alert-success');
@@ -151,7 +148,6 @@ class CustomModal {
                 this.setContent(result); // Recharge le modal avec le contenu mis à jour
                 return;
             }
-            console.log(redirectUrl);
 
             if (hasSuccess) {
                 this.setLoading();

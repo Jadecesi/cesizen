@@ -11,7 +11,7 @@
 body {
     margin: 0;
     font-family: var(--font-main);
-    background: var(--neutral-color);
+    background: #f8f9fa;
     color: var(--text-color);
     display: flex;
     flex-direction: column;
@@ -41,13 +41,17 @@ body {
 }
 
 .header-authenticated img {
-    height: 50px;
+    height: 55px;
 }
 
 .header-userless img {
-    height: 50px;
+    height: 55px;
     margin-left: 50px;
     margin-right: 150px;
+}
+
+h2 {
+    color: var(--primary-color) !important;
 }
 
 .header-buttons {
@@ -56,6 +60,7 @@ body {
     align-content: center;
     justify-content: center;
     align-items: center;
+    gap: 25px;
 }
 
 .header-buttons .button {
@@ -383,7 +388,7 @@ tbody tr:hover {
 }
 
 .high-stress h2 {
-    color: #d32f2f;
+    color: #d32f2f !important;
 }
 
 .medium-stress {
@@ -392,7 +397,7 @@ tbody tr:hover {
 }
 
 .medium-stress h2 {
-    color: #e65100;
+    color: #e65100 !important;
 }
 
 .low-stress {
@@ -401,7 +406,7 @@ tbody tr:hover {
 }
 
 .low-stress h2 {
-    color: #2e7d32;
+    color: #2e7d32 !important;
 }
 
 /* Style du bouton à droite */
@@ -500,7 +505,6 @@ tbody tr:hover {
 .dashboard-title {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--accent-color);
     margin-bottom: 20px;
 }
 
@@ -547,7 +551,7 @@ thead {
 thead th, tbody td {
     padding: 10px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #ddd !important;
 }
 
 tbody tr:nth-child(odd) {
@@ -918,7 +922,7 @@ tbody tr:nth-child(odd) {
     position: absolute;
     right: 10px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%) !important;
     background: none;
     border: none;
     cursor: pointer;
@@ -979,10 +983,35 @@ tbody tr:nth-child(odd) {
 
 /*CONTENU*/
 .content-grid {
-    display: flex;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    display: grid;
+    grid-template-columns: 1fr; /* Par défaut: 1 colonne sur mobile */
     gap: 2rem;
     padding: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 1440px; /* Limite la largeur maximale */
+    margin: 0 auto; /* Centre la grille */
+}
+
+/* Tablette */
+@media (min-width: 768px) {
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .content-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 colonnes */
+    }
+}
+
+/* Grand écran */
+@media (min-width: 1440px) {
+    .content-grid {
+        grid-template-columns: repeat(4, 1fr); /* 4 colonnes maximum */
+    }
 }
 
 .content-title {
@@ -999,7 +1028,7 @@ tbody tr:nth-child(odd) {
     display: flex;
     flex-direction: column;
     height: 450px;
-    width: 60%;
+    width: 100%;
     min-width: 300px;
 }
 
@@ -1106,4 +1135,65 @@ tbody tr:nth-child(odd) {
     width: 24px;
     height: 24px;
     cursor: pointer;
+}
+
+/*POLITIQUE DE CONFIDENTIALITÉ*/
+.privacy-policy {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.privacy-policy section {
+    margin-bottom: 30px;
+}
+
+.privacy-policy h3 {
+    color: var(--accent-color);
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.privacy-policy ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.privacy-policy p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.privacy-policy h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+}
+
+.table tbody tr.user-lock {
+    background-color: rgba(220, 53, 69, 0.15) !important; /* Lighter red with opacity */
+}
+
+.danger-btn,
+.btn-reset-password {
+    background-color: #dc3545; /* Couleur rouge de Bootstrap */
+    color: white;
+}
+
+.btn-reset-password:hover {
+    background-color: #bb2d3b; /* Version plus foncée au survol */
+    color: white;
+}
+
+.token-input-group {
+ display: flex;
+ gap: 10px;
+ align-items: flex-start;
+}
+
+.api-token-field {
+    flex: 1;
+}
+
+.generate-token-btn {
+    white-space: nowrap;
 }

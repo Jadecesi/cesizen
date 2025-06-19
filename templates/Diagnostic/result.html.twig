@@ -5,16 +5,7 @@
 {% endblock %}
 
 {% block modal_message_flash %}
-    {% for message in app.flashes('error') %}
-        <div class="alert alert-danger">
-            {{ message }}
-        </div>
-    {% endfor %}
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success">
-            {{ message }}
-        </div>
-    {% endfor %}
+    {% include 'part/addFlash.html.twig' %}
 {% endblock %}
 
 {% block modal_content %}
@@ -32,7 +23,7 @@
         </ul>
     </div>
 
-    <p><strong>Si vous souhaitez avoir un historique de vos diagnostique. Vous devrais crée un compte</strong></p>
+    <p><strong>Si vous souhaitez avoir un historique de vos diagnostics. Vous devrais crée un compte</strong></p>
 
     <div class="modal--actions">
         <a data-redirect="{{ path('app_signup') }}" class="button new-diagnostic-btn" data-target="modal">S'inscrire</a>

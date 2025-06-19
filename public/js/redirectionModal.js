@@ -1,21 +1,32 @@
-document.addEventListener("DOMContentLoaded", initRedirection);
-document.addEventListener("modalContentLoaded", initRedirection);
+// Remove the DOMContentLoaded listener since CustomModal already handles initialization
+document.addEventListener("modalContentLoaded", initRedirection, { once: true });
 
 function initRedirection() {
-    document.addEventListener("click", function (e) {
-        const target = e.target.closest('[data-redirect][data-target="modal"]');
-        if (!target) return;
+    // Remove existing listeners first
+    document.removeEventListener("click", handleRedirectClick);
+    // Add new listener
+    document.addEventListener("click", handleRedirectClick);
+}
 
-        e.preventDefault();
-        const redirectUrl = target.dataset.redirect;
-        if (!redirectUrl) return;
+function handleRedirectClick(e) {
+    const target = e.target.closest('[data-redirect][data-target="modal"]');
+    if (!target) return;
 
-        // Ferme le modal courant
-        if (window.customModal) {
-            window.customModal.close();
-            setTimeout(() => {
-                window.customModal.loadContentInModal(redirectUrl);
-            }, 300);
-        }
-    });
+    e.preventDefault();
+    e.stopPropagation(); // Prevent event bubbling
+
+    const redirectUrl = target.dataset.redirect;
+    if (!redirectUrl || !window.customModal) return;
+
+    // Use a flag to prevent multiple executions
+    if (target.dataset.processing === 'true') return;
+    target.dataset.processing = 'true';
+
+    window.customModal.close();
+    setTimeout(() => {
+        window.customModal.loadContentInModal(redirectUrl)
+            .finally(() => {
+                target.dataset.processing = 'false';
+            });
+    }, 300);
 }

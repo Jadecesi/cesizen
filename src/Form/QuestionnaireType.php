@@ -24,7 +24,6 @@ class QuestionnaireType extends AbstractType
                 'required' => true,
             ]);
         if ($user) {
-            dump('ici', $user);
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Valider',
                 'attr' => [
@@ -32,7 +31,6 @@ class QuestionnaireType extends AbstractType
                 ]
             ]);
         } else {
-            dump('la', $user);
             $builder->add('submit', SubmitType::class, [
                 'label' => 'Valider',
                 'attr' => [

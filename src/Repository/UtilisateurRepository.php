@@ -33,6 +33,17 @@ class UtilisateurRepository extends ServiceEntityRepository implements PasswordU
         $this->getEntityManager()->flush();
     }
 
+    public function findOneByValidApiToken(string $token): ?Utilisateur
+    {
+        return $this->createQueryBuilder('u')
+            ->andWhere('u.apiToken = :tok')
+            ->andWhere('u.tokenExpiresAt > :now')
+            ->setParameter('tok', $token)
+            ->setParameter('now', new \DateTimeImmutable())
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
 //    /**
 //     * @return Utilisateur[] Returns an array of Utilisateur objects
 //     */
