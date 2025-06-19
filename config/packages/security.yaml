@@ -14,6 +14,14 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            user_checker: security.user_checker
+            custom_authenticators:
+                - App\Security\ApiTokenAuthenticator
+
         main:
             lazy: true
             provider: app_user_provider
@@ -24,6 +32,7 @@ security:
                 check_path: app_login
                 username_parameter: _username
                 password_parameter: _password
+            user_checker: security.user_checker
 
             logout:
                 path: app_logout
@@ -32,21 +41,11 @@ security:
                 lifetime: 604800
                 path: /
 
-        api_login:
-            pattern: ^/api/login$
-            stateless: true
-            json_login:
-                check_path: /api/login
-                username_path: email
-                password_path: password
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-
     access_control:
-        - { path: ^/diagnostic/.*user.*, roles: ROLE_USER }
-        - { path: ^/.*user.*, roles: ROLE_USER }
+        - { path: ^/api/user/.*, roles: ROLE_USER }
+        - { path: ^/diagnostic/.*user.*, roles: PUBLIC_ACCESS }
+        - { path: ^/.*user.*, roles: PUBLIC_ACCESS }
         - { path: ^/.*admin.*, roles: ROLE_ADMIN }
-        - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/contenus, roles: PUBLIC_ACCESS }
 
 when@test:

@@ -2,11 +2,17 @@
 
 namespace App\Controller;
 
+use App\Entity\ResetPassword;
 use App\Entity\Utilisateur;
+use App\Form\Security\ResetPasswordType;
+use App\Form\Security\RequestForgotPasswordType;
 use App\Form\Security\SignupType;
+use App\Form\Security\VerificationTokenPasswordType;
+use App\Repository\ResetPasswordRepository;
 use App\Repository\RoleRepository;
 use App\Repository\UtilisateurRepository;
 use App\Security\AuthentificationAuthenticator;
+use App\Service\ServiceMail;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -15,11 +21,23 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class SecurityController extends AbstractController
 {
+    private ResetPasswordRepository $resetPasswordRepository;
+
+    public function __construct
+    (
+        ResetPasswordRepository $resetPasswordRepository
+    )
+    {
+        $this->resetPasswordRepository = $resetPasswordRepository;
+    }
+
     #[Route(path: '/login', name: 'app_login', methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -27,7 +45,15 @@ class SecurityController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
         if ($error) {
-            $this->addFlash('error', 'Identifiants incorrects.');
+            $errorMessage = match ($error->getMessageKey()) {
+                'Invalid credentials.' => 'Identifiants invalides',
+                'The presented password is invalid.' => 'Le mot de passe est incorrect',
+                'Username could not be found.' => 'Cet email n\'est pas enregistré',
+                'Account is disabled.' => 'Votre compte est désactivé',
+                default => $error->getMessage(),
+            };
+
+            $this->addFlash('error', $errorMessage);
         }
 
         return $this->render('Security/login.html.twig', [
@@ -42,7 +68,18 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/signup', name: 'app_signup')]
-    public function signup(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UtilisateurRepository $utilisateurRepository, RoleRepository $roleRepository, UserPasswordHasherInterface $userPasswordHasher, AuthentificationAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
+    public function signup
+    (
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher,
+        UtilisateurRepository $utilisateurRepository,
+        RoleRepository $roleRepository,
+        UserPasswordHasherInterface $userPasswordHasher,
+        AuthentificationAuthenticator $authenticator,
+        UserAuthenticatorInterface $userAuthenticator,
+        ValidatorInterface $validator
+    ): Response {
 
         $form = $this->createForm(SignupType::class);
         $form->handleRequest($request);
@@ -70,6 +107,8 @@ class SecurityController extends AbstractController
 
             $role = $roleRepository->findOneBy(['nom' => 'ROLE_USER']);
 
+
+
             $utilisateur = new Utilisateur();
             $utilisateur->setPrenom($user['prenom']);
             $utilisateur->setNom($user['nom']);
@@ -78,6 +117,7 @@ class SecurityController extends AbstractController
             $utilisateur->setDateNaissance($user['dateNaissance']);
             $utilisateur->setPassword($userPasswordHasher->hashPassword($utilisateur, $user['password']));
             $utilisateur->setRole($role);
+            $utilisateur->setIsActif(true);
 
             // Gestion de l'image de profil
             /** @var UploadedFile $profilePicture */
@@ -104,11 +144,7 @@ class SecurityController extends AbstractController
                 $utilisateur->setPhotoProfile('default.png');
             }
 
-            // Hashage du mot de passe
-            $hashedPassword = $passwordHasher->hashPassword($utilisateur, $form->get('password')->getData());
-            $utilisateur->setPassword($hashedPassword);
 
-            dump($utilisateur);
             $entityManager->persist($utilisateur);
             $entityManager->flush();
 
@@ -119,6 +155,11 @@ class SecurityController extends AbstractController
                 $authenticator,
                 $request
             );
+        } else {
+            $errors = $form->getErrors(true);
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('Security/signup.html.twig', [
@@ -130,5 +171,191 @@ class SecurityController extends AbstractController
     public function accessDeniedPublic(): Response
     {
         return $this->render('Security/access_denied.html.twig');
+    }
+
+    #[Route('/request-reset-password', name: 'app_forgot_password_request')]
+    public function request
+    (
+        Request $request,
+        TokenGeneratorInterface $tokenGenerator,
+        UtilisateurRepository $utilisateurRepository,
+        EntityManagerInterface $entityManager,
+        ServiceMail $serviceMail
+    ): Response {
+        $user = $this->getUser();
+        if ($user) {
+           $email = $user->getEmail();
+        } else {
+            $email = null;
+        }
+
+        $form = $this->createForm(RequestForgotPasswordType::class, null, [
+            'email' => $email
+        ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $mail = $form->get('mail')->getData();
+            $utilisateur = $utilisateurRepository->findOneBy(['email' => $mail]);
+
+            if ($utilisateur) {
+                $token = $tokenGenerator->generateToken();
+                $code = random_int(100000, 999999);
+                $resetPassword = new ResetPassword();
+                $resetPassword->setUser($utilisateur);
+                $resetPassword->setToken($token);
+                $resetPassword->setCreatedAt(new \DateTimeImmutable());
+                $resetPassword->setCode($code);
+
+                $entityManager->persist($resetPassword);
+                $entityManager->flush();
+
+                $emails = $utilisateur->getEMail();
+
+                try {
+                    $serviceMail->send(
+                        'noreply@cesizen.com',
+                        'Réinitialisation de mot de passe',
+                        (array)$emails,
+                        [],
+                        'mail/resetPasswordUser.html.twig',
+                        [],[
+                            'token' => $token,
+                            'code'  => $code,
+                            'user'  => $utilisateur,
+                        ]
+                    );
+
+                    $entityManager->persist($resetPassword);
+                    $entityManager->flush();
+
+                    $this->addFlash('success', 'Un email de réinitialisation a été envoyé');
+                    return $this->redirectToRoute('app_verifi_code_password', [
+                        'token' => $token
+                    ]);
+
+                } catch (\Exception $e) {
+                    error_log($e->getMessage());
+                    $this->addFlash('error', sprintf('Erreur lors de l\'envoi de l\'email : %s', $e->getMessage()));
+                    return $this->redirectToRoute('app_forgot_password_request');
+                }
+
+            } else {
+                $this->addFlash('error', 'Aucun utilisateur trouvé avec cet email');
+            }
+        }
+
+        return $this->render('Security/resetPasswordRequest.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/{token}/token/verification', name: 'app_verifi_code_password')]
+    public function verificationCodeForgotPassword (
+        string $token,
+        Request $request,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        // Recherche du token dans la base de données
+        $resetPassword = $this->resetPasswordRepository->findOneBy(['token' => $token]);
+
+        // Vérifie si le token existe et n'a pas expiré (1 heure)
+        if (!$resetPassword ||
+            $resetPassword->getCreatedAt()->modify('+1 hour') < new \DateTimeImmutable()) {
+            if ($resetPassword) {
+                $entityManager->remove($resetPassword);
+                $entityManager->flush();
+            }
+            $this->addFlash('error', 'Ce lien de réinitialisation n\'est plus valide');
+            return $this->redirectToRoute('app_forgot_password_request');
+        }
+
+        $form = $this->createForm(VerificationTokenPasswordType::class);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $code = $form->get('code')->getData();
+
+            if ($code) {
+
+                if ($code === (string)$resetPassword->getCode()) {
+                    $this->addFlash('success', 'Code de vérification valide');
+
+                    return $this->redirectToRoute('app_reset_password', [
+                        'token' => $token
+                    ]);
+                } else {
+                    $this->addFlash('error', 'Code de vérification invalide');
+                }
+
+            } else {
+                $this->addFlash('error', 'Veuillez entrer le code de vérification');
+            }
+        }
+
+        return $this->render('Security/verificationCodePassword.html.twig', [
+            'form' => $form->createView(),
+            'token' => $token
+        ]);
+    }
+
+    #[Route('/{token}/token/new-password', name: 'app_reset_password')]
+    public function resetPassword
+    (
+        string $token,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher,
+        AuthentificationAuthenticator $authenticator,
+        UserAuthenticatorInterface $userAuthenticator,
+    ) : Response {
+        $form = $this->createForm(ResetPasswordType::class);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $password = $form->get('password')->getData();
+            $resetPassword = $this->resetPasswordRepository->findOneBy(['token' => $token]);
+
+            if ($data['password'] !== $data['confirmPassword']) {
+                $this->addFlash('error', 'Les mots de passe ne correspondent pas');
+
+                return $this->redirectToRoute('app_reset_password', [
+                    'token' => $token
+                ]);
+            }
+
+            if ($password) {
+                $user = $resetPassword->getUser();
+
+                // Hash du nouveau mot de passe
+                $hashedPassword = $passwordHasher->hashPassword($user, $password);
+                $user->setPassword($hashedPassword);
+
+                // Suppression du token
+                $entityManager->remove($resetPassword);
+                $entityManager->flush();
+
+                // Connexion de l'utilisateur
+                $this->addFlash('success', 'Votre mot de passe a été modifié avec succès');
+
+                return $userAuthenticator->authenticateUser(
+                    $user,
+                    $authenticator,
+                    $request
+                );
+
+            } else {
+                $this->addFlash('error', 'Veuillez entrer un mot de passe valide');
+            }
+        }
+
+        return $this->render('Security/resetPassword.html.twig', [
+            'token' => $token,
+            'form' => $form->createView()
+        ]);
     }
 }

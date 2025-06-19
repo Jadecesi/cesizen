@@ -1,0 +1,425 @@
+{% extends 'base.html.twig' %}
+
+{%  block title %}Dashboard{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('/css/dashboardAdmin.css') }}">
+{% endblock %}
+
+
+{% block body %}
+    <div class="admin-dashboard">
+        <h2>Tableau de bord administrateur</h2>
+
+        <div class="statistics-section">
+            <div class="row align-items-center">
+                <h3 class="col-11" style="color: #2c3e50; font-size: 1.8rem; font-weight: 600;">Statistiques générales</h3>
+            </div>
+            <hr/>
+            <div class="charts-grid">
+                <div class="chart-wrapper" style="grid-column: span 2;">
+                    <div class="chart-title">Évolution du stress et événements par âge</div>
+                    <div class="chart-container">
+                        <canvas id="combinedChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <div class="chart-title">Répartition des niveaux de stress</div>
+                    <div class="chart-container">
+                        <canvas id="stressLevelChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="user-management">
+            <div class="row align-items-center">
+                <h3 class="col-11" style="color: #2c3e50; font-size: 1.8rem; font-weight: 600;">Gestion des utilisateurs</h3>
+            </div>
+            <hr/>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for utilisateur in utilisateurs %}
+                    {% set idDropdown = "gestionUserDropdownMenu" ~ utilisateur.id %}
+                    <tr>
+                        <td>{{ utilisateur.id }}</td>
+                        <td>{{ utilisateur.nom }}</td>
+                        <td>{{ utilisateur.prenom }}</td>
+                        <td>{{ utilisateur.email }}</td>
+                        <td>{{ utilisateur.role }}</td>
+                        <td>
+                            <div class="row justify-content-start mt-2">
+                                <a href="{{ path('app_edit_user', {'id': utilisateur.id}) }}"
+                                   class="col-4 fa-solid fa-xl fa-pen-to-square"
+                                   data-target="modal" style="color: #FFC107"
+                                   title="Modifier">
+                                </a>
+                                <a href="{{ path('app_confirm_mail_renisialisation_password_admin', {'id': utilisateur.id}) }}" class="col-4 fa-xl fa-solid fa-key" data-target="modal" title="Réinitialiser le mot de passe"></a>
+                                {% if utilisateur.isActif == 1 %}
+                                    <a href="{{ path('app_confirm_satus_user', {'id': utilisateur.id}) }}" class="col-4 fa-xl fa-solid fa-user-xmark" style="color: #C60707" data-target="modal" title="Désactiver le compte"></a>
+                                {% else %}
+                                    <a href="{{ path('app_confirm_satus_user', {'id': utilisateur.id}) }}" class="col-4 fa-xl fa-solid fa-user-check" style="color: #4caf50" data-target="modal" title="Activer le compte"></a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="diagnostic-management">
+            <div class="row align-items-center">
+                <h3 class="col-11" style="color: #2c3e50; font-size: 1.8rem; font-weight: 600;">Gestion des évènements de stress</h3>
+                <a href="{{ path('app_event_new') }}" class="col-1 fa-2xl fa-solid fa-circle-plus" style="color: #ffc107" data-target="modal"></a>
+            </div>
+            <hr/>
+            <div class="accordion" id="eventAccordion">
+                {% set eventsByCategory = {} %}
+                {% for event in events %}
+                    {% set category = event.categorie.libelle %}
+                    {% if eventsByCategory[category] is not defined %}
+                        {% set eventsByCategory = eventsByCategory|merge({(category): []}) %}
+                    {% endif %}
+                    {% set eventsByCategory = eventsByCategory|merge({
+                        (category): eventsByCategory[category]|merge([event])
+                    }) %}
+                {% endfor %}
+
+                {% for category, categoryEvents in eventsByCategory %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapse{{ loop.index }}" aria-expanded="false"
+                                    aria-controls="collapse{{ loop.index }}">
+                                {{ category }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse"
+                             aria-labelledby="heading{{ loop.index }}" data-bs-parent="#eventAccordion">
+                            <div class="accordion-body">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Nom</th>
+                                        <th scope="col">Stress</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for event in categoryEvents %}
+                                        <tr>
+                                            <td data-label="ID">{{ event.id }}</td>
+                                            <td data-label="Nom">{{ event.nom }}</td>
+                                            <td data-label="Stress">{{ event.stress }}</td>
+                                            <td data-label="Actions">
+                                                <div class="row justify-content-start mt-2">
+                                                    <a href="{{ path('app_edit_event', {'id': event.id}) }}" class="col-4 fa-solid fa-xl fa-pen-to-square" style="color: #ffc107" data-target="modal"></a>
+                                                    <a href="{{ path('app_confirm_delete_event', {'id': event.id}) }}" class="col-4 fa-xl fa-solid fa-trash-can" style="color: #C60707" data-target="modal"></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+            <section class="diagnostic-history statistics-section">
+                <div class="row align-items-center">
+                    <h3 class="col-11" style="color: #2c3e50; font-size: 1.8rem; font-weight: 600;">Historique de vos diagnostics</h3>
+                    <a href="{{ path('app_diagnostic_new_user') }}" class="col-1 fa-2xl fa-solid fa-circle-plus" style="color: #ffc107" data-target="modal"></a>
+                </div>
+                <hr/>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Évènement de stress</th>
+                        <th>Score</th>
+                        <th>Commentaires</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for diagnostic in diagnosticAdmin %}
+                        <tr>
+                            <td>{{ diagnostic.dateCreation|date('d/m/Y') }}</td>
+                            <td>
+                                <ul>
+                                    {% for event in diagnostic.events %}
+                                        <li>{{ event.nom }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>{{ diagnostic.totalStress }}</td>
+                            <td>{{ diagnostic.getCommentaire(diagnostic.totalStress)|raw }}</td>
+                            <td>
+                                <a href="{{ path('app_confirm_delete_diagnostic', {'id': diagnostic.id}) }}"
+                                   class="col-4 fa-xl fa-solid fa-trash-can"
+                                   style="color: #C60707"
+                                   data-target="modal">
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Graphique niveau de stress
+            new Chart(document.getElementById('stressLevelChart'), {
+                type: 'pie',
+                data: {
+                    labels: {{ chartDataStressLevel.stressLevels|json_encode|raw }},
+                    datasets: [{
+                        data: {{ chartDataStressLevel.stressData|json_encode|raw }},
+                        backgroundColor: [
+                            'rgba(230, 81, 0, 0.85)',     // Orange
+                            'rgba(46, 125, 50, 0.85)',    // Vert
+                            'rgba(211, 47, 47, 0.85)'     // Rouge
+                        ],
+                        borderColor: 'white',
+                        borderWidth: 2,
+                        hoverBorderColor: 'white',
+                        hoverBorderWidth: 3,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                },
+                                usePointStyle: true,
+                                boxWidth: 10,
+                                color: '#2c3e50'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#2c3e50',
+                            bodyColor: '#2c3e50',
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold',
+                                family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                            },
+                            bodyFont: {
+                                size: 13,
+                                family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                            },
+                            displayColors: true,
+                            boxWidth: 10,
+                            boxHeight: 10,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed || 0;
+                                    return label + ' : ' + value;
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 20,
+                            right: 20,
+                            bottom: 20,
+                            left: 20
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('combinedChart'), {
+                type: 'bar',
+                data: {
+                    labels: {{ eventsByCategorieAndAge.ages|json_encode|raw }},
+                    datasets: [
+                        {
+                            label: 'Niveau de stress moyen',
+                            data: {{ chartDataEvolutionByAge.data|json_encode|raw }},
+                            type: 'line',
+                            borderColor: 'rgb(46,125,50)',
+                            backgroundColor: 'rgba(46,125,50,0.1)',
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                            order: 0,
+                            fill: true,
+                            pointBackgroundColor: 'rgb(46,125,50)',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            borderWidth: 3,
+                            shadowBlur: 10,
+                            shadowColor: 'rgba(46,125,50,0.5)'
+                        },
+                        {% for dataset in eventsByCategorieAndAge.datasets %}
+                        {
+                            label: {{ dataset.label|json_encode|raw }},
+                            data: {{ dataset.data|json_encode|raw }},
+                            backgroundColor: '{{ dataset.backgroundColor }}',
+                            borderColor: '{{ dataset.borderColor }}',
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            order: 1,
+                            borderRadius: 4,
+                            maxBarThickness: 35
+                        }{% if not loop.last %},{% endif %}
+                        {% endfor %}
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12,
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                },
+                                usePointStyle: true,
+                                boxWidth: 10
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#2c3e50',
+                            bodyColor: '#2c3e50',
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            displayColors: true,
+                            boxWidth: 10,
+                            boxHeight: 10,
+                            usePointStyle: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            position: 'left',
+                            stacked: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Nombre d\'événements par catégorie',
+                                color: '#2c3e50',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold',
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                },
+                                padding: {bottom: 10}
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Niveau de stress moyen',
+                                color: '#2c3e50',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold',
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                },
+                                padding: {bottom: 10}
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            stacked: true,
+                            grid: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Âge',
+                                color: '#2c3e50',
+                                font: {
+                                    size: 13,
+                                    weight: 'bold',
+                                    family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
+                                },
+                                padding: {top: 20}
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 20,
+                            right: 20,
+                            bottom: 20,
+                            left: 20
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

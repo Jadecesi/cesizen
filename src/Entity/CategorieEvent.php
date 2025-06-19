@@ -2,29 +2,26 @@
 
 namespace App\Entity;
 
-use App\Repository\ReponseRepository;
+use App\Repository\CategorieEventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\UX\Turbo\Attribute\Broadcast;
 
-#[ORM\Entity(repositoryClass: ReponseRepository::class)]
-#[Broadcast]
-class Reponse
+#[ORM\Entity(repositoryClass: CategorieEventRepository::class)]
+class CategorieEvent
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reponses')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Diagnostic $diagnostics = null;
+    #[ORM\Column(length: 255)]
+    private ?string $libelle = null;
 
     /**
      * @var Collection<int, Event>
      */
-    #[ORM\ManyToMany(targetEntity: Event::class, inversedBy: 'reponses')]
+    #[ORM\OneToMany(targetEntity: Event::class, mappedBy: 'categorie')]
     private Collection $events;
 
     public function __construct()
@@ -37,14 +34,14 @@ class Reponse
         return $this->id;
     }
 
-    public function getDiagnostics(): ?Diagnostic
+    public function getLibelle(): ?string
     {
-        return $this->diagnostics;
+        return $this->libelle;
     }
 
-    public function setDiagnostics(?Diagnostic $diagnostics): static
+    public function setLibelle(string $libelle): static
     {
-        $this->diagnostics = $diagnostics;
+        $this->libelle = $libelle;
 
         return $this;
     }
@@ -61,6 +58,7 @@ class Reponse
     {
         if (!$this->events->contains($event)) {
             $this->events->add($event);
+            $event->setCategorie($this);
         }
 
         return $this;
@@ -68,7 +66,12 @@ class Reponse
 
     public function removeEvent(Event $event): static
     {
-        $this->events->removeElement($event);
+        if ($this->events->removeElement($event)) {
+            // set the owning side to null (unless already changed)
+            if ($event->getCategorie() === $this) {
+                $event->setCategorie(null);
+            }
+        }
 
         return $this;
     }

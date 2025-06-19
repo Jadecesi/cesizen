@@ -1,0 +1,122 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}{{ utilisateur.username ?: utilisateur.nom ~ ' ' ~ utilisateur.prenom }}{% endblock %}
+
+{% block modal_message_flash %}
+    {% include 'part/addFlash.html.twig' %}
+{% endblock %}
+
+{% block modal_content %}
+    <div class="profile-picture">
+        {% if app.user.photoProfile %}
+            <img src="{{ asset('uploads/profiles/' ~ app.user.photoProfile) }}" alt="Photo de profil">
+        {% else %}
+            <img src="{{ asset('images/profilePicture1.png') }}" alt="Photo par défaut">
+        {% endif %}
+    </div>
+
+    {{ form_start(form, {'action': action}) }}
+
+    <div class="profile-field">
+        {{ form_label(form.nom) }}
+        {{ form_widget(form.nom) }}
+        {{ form_errors(form.nom) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.prenom) }}
+        {{ form_widget(form.prenom) }}
+        {{ form_errors(form.prenom) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {{ form_errors(form.email) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.dateNaissance) }}
+        {{ form_widget(form.dateNaissance) }}
+        {{ form_errors(form.dateNaissance) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.username) }}
+        {{ form_widget(form.username) }}
+        {{ form_errors(form.username) }}
+    </div>
+
+    <div class="profile-field api-token-container">
+        {{ form_label(form.apiToken) }}
+        <div class="token-input-group">
+            {{ form_widget(form.apiToken) }}
+            <button type="button" onclick="generateApiToken()" class="button btn-success-modal">Générer</button>
+        </div>
+        {{ form_errors(form.apiToken) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.tokenExpiresAt) }}
+        {{ form_widget(form.tokenExpiresAt) }}
+        {{ form_errors(form.tokenExpiresAt) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.role) }}
+        {{ form_widget(form.role) }}
+        {{ form_errors(form.role) }}
+    </div>
+
+    <div class="profile-buttons">
+        {{ form_widget(form.modifier) }}
+    </div>
+
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block js_modal %}
+    <script>
+        function generateApiToken() {
+            const tokenField = document.querySelector('[name="utilisateur[apiToken]"]');
+            const expirationField = document.querySelector('[name="utilisateur[tokenExpiresAt]"]');
+
+            // Fonction pour générer un UUID v4
+            function uuidv4() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0,
+                        v = c == 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+
+            // Fonction pour générer des bytes aléatoires
+            function generateRandomBytes(length) {
+                const chars = '0123456789abcdef';
+                let result = '';
+                for (let i = 0; i < length * 2; i++) {
+                    result += chars[Math.floor(Math.random() * chars.length)];
+                }
+                return result;
+            }
+
+            // Générer le token
+            const uuid = uuidv4();
+            const randomBytes = generateRandomBytes(32);
+            tokenField.value = uuid + randomBytes;
+
+            // Mettre à jour la date d'expiration
+            if (expirationField) {
+                const expirationDate = new Date();
+                expirationDate.setDate(expirationDate.getDate() + 7);
+                const formattedDate = expirationDate.toISOString().split('T')[0];
+                expirationField.value = formattedDate;
+            }
+        }
+    </script>
+{% endblock %}
+
+
+
+
+

@@ -7,37 +7,39 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\UX\Turbo\Attribute\Broadcast;
 
 #[ORM\Entity(repositoryClass: DiagnosticRepository::class)]
-#[Broadcast]
 class Diagnostic
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['api_user', 'api_diagnostic'])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['api_diagnostic'])]
     private ?float $totalStress = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    #[Groups(['api_diagnostic'])]
     private ?\DateTimeInterface $dateCreation = null;
 
     #[ORM\ManyToOne(inversedBy: 'diagnostics')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['api_diagnostic'])]
     private ?Utilisateur $utilisateur = null;
 
-    /**
-     * @var Collection<int, Reponse>
-     */
-    #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'diagnostics')]
-    private Collection $reponses;
+    #[ORM\ManyToMany(targetEntity: Event::class, inversedBy: 'diagnostics')]
+    #[Groups(['api_diagnostic'])]
+    private Collection $events;
 
     public function __construct()
     {
-        $this->reponses = new ArrayCollection();
-        $this->dateCreation = new \DateTime();
+        $this->events = new ArrayCollection();
+        $this->dateCreation = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
     }
 
     public function getId(): ?int
@@ -62,15 +64,6 @@ class Diagnostic
         return $this->dateCreation;
     }
 
-    public function setDateCreation(): static
-    {
-        $dateCreation = new \DateTime('now');
-
-        $this->dateCreation = $dateCreation;
-
-        return $this;
-    }
-
     public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
@@ -84,33 +77,39 @@ class Diagnostic
     }
 
     /**
-     * @return Collection<int, Reponse>
+     * @return Collection<int, Event>
      */
-    public function getReponses(): Collection
+    public function getEvents(): Collection
     {
-        return $this->reponses;
+        return $this->events;
     }
 
-    public function addReponse(Reponse $reponse): static
+    public function addEvent(Event $event): static
     {
-        if (!$this->reponses->contains($reponse)) {
-            $this->reponses->add($reponse);
-            $reponse->setDiagnostics($this);
+        if (!$this->events->contains($event)) {
+            $this->events->add($event);
+            $event->addDiagnostic($this);
         }
-
         return $this;
     }
 
-    public function removeReponse(Reponse $reponse): static
+    public function removeEvent(Event $event): static
     {
-        if ($this->reponses->removeElement($reponse)) {
-            // set the owning side to null (unless already changed)
-            if ($reponse->getDiagnostics() === $this) {
-                $reponse->setDiagnostics(null);
-            }
+        if ($this->events->removeElement($event)) {
+            $event->removeDiagnostic($this);
         }
-
         return $this;
+    }
+
+    public function getNiveauStress(int $totalStress): string
+    {
+        if ($totalStress >= 300) {
+            return 'Élevé';
+        } elseif ($totalStress >= 100 && $totalStress < 300) {
+            return 'Modéré';
+        } else {
+            return 'Faible';
+        }
     }
 
     public function getCommentaire(int $totalStress): ?string

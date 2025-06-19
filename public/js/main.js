@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.open-modal').forEach(button => {
         button.addEventListener('click', async (e) => {
             e.preventDefault();
-            console.log("Bouton modal cliqué !");
 
             const url = button.getAttribute('href');
             if (url) {

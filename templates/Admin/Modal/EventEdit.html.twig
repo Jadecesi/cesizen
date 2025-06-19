@@ -1,0 +1,43 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}Event - {{ event.nom }}{% endblock %}
+
+{% block modal_message_flash %}
+    {% include 'part/addFlash.html.twig' %}
+{% endblock %}
+
+
+{% block modal_content %}
+    {{ form_start(form, {'action': action}) }}
+
+    <div class="profile-field">
+        {{ form_label(form.nom) }}
+        {{ form_widget(form.nom) }}
+        {{ form_errors(form.nom) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.stress) }}
+        {{ form_widget(form.stress) }}
+        {{ form_errors(form.stress) }}
+    </div>
+
+    <div class="profile-field">
+        {{ form_label(form.categorie) }}
+        {{ form_widget(form.categorie) }}
+        {{ form_errors(form.categorie) }}
+    </div>
+
+    <div class="profile-buttons">
+        <div class="profile-field">
+            {{ form_row(form.sumbit) }}
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+{% endblock %}
+
+
+
+
+

@@ -96,7 +96,7 @@ class ContenuController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $dateModification = new \DateTime('now');
+            $dateModification = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
             $contenu->setDateModification($dateModification);
 
             /** @var UploadedFile|null $image */

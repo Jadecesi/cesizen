@@ -1,0 +1,17 @@
+{% extends 'modalBase.html.twig' %}
+
+{% block modal_title %}Suppression du compte{% endblock %}
+
+{% block modal_content %}
+    <h3>Êtes-vous sûr de vouloir supprimer votre compte utilisateur ?</h3>
+<br>
+<p>Toutes les données relatives à ce compte seront supprimées.</p>
+    <div class="modal--actions">
+        <button type="button"
+                data-redirect="{{ path('app_delete_user', {'id': utilisateur.id}) }}"
+                class="btn btn-danger btn-lg modalImbriquer"
+                data-target="modal">
+            Supprimer
+        </button>
+    </div>
+{% endblock %}

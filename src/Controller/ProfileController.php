@@ -19,13 +19,16 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ProfileController extends AbstractController
 {
     private UtilisateurRepository $utilisateurRepository;
+    private EntityManagerInterface $em;
 
     public function __construct
     (
-        UtilisateurRepository $utilisateurRepository
+        UtilisateurRepository $utilisateurRepository,
+        EntityManagerInterface $em
     )
     {
         $this->utilisateurRepository = $utilisateurRepository;
+        $this->em = $em;
     }
 
     #[Route('/', name: 'app_profile')]
@@ -58,6 +61,7 @@ class ProfileController extends AbstractController
 
                     return $this->render('User/profile.html.twig', [
                         'form' => $form->createView(),
+                        'utilisateur' => $user,
                     ]);
                 }
             }
@@ -77,6 +81,7 @@ class ProfileController extends AbstractController
 
                 return $this->render('User/profile.html.twig', [
                     'form' => $form->createView(),
+                    'utilisateur' => $user,
                 ]);
             }
 
@@ -116,6 +121,39 @@ class ProfileController extends AbstractController
 
         return $this->render('User/profile.html.twig', [
             'form' => $form->createView(),
+            'utilisateur' => $user,
         ]);
+    }
+
+    #[Route('/user/{id}/confirm-delete', name: 'app_confirm_delete_user')]
+    #[IsGranted('ROLE_USER')]
+    public function confirmDeleteUser(Utilisateur $utilisateur)
+    {
+        return $this->render('User/confirmDeleteUser.html.twig', [
+            'utilisateur' => $utilisateur,
+        ]);
+    }
+
+    #[Route('/user/{id}/delete', name: 'app_delete_user', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
+    public function deleteUser(Utilisateur $utilisateur)
+    {
+        try {
+            $this->em->remove($utilisateur);
+            $this->em->flush();
+
+            return $this->render('succesModal.html.twig', [
+                'titre' => 'Suppression réussie',
+                'btn' => 'Retour au tableau de bord',
+                'action' => $this->generateUrl('app_home'),
+            ]);
+        } catch (\Exception $e) {
+            return $this->render('errorModal.html.twig', [
+                'titre' => 'Suppression réussie',
+                'message' => 'Une erreur est survenue lors de la suppression.',
+                'btn' => 'Retour au tableau de bord',
+                'action' => $this->generateUrl('app_home'),
+            ]);
+        }
     }
 }
