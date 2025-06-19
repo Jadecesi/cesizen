@@ -27,6 +27,59 @@ class SecurityControllerTest extends WebTestCase
         $this->entityManager->flush();
     }
 
+    //Test d'intégration
+    public function testSignup(): void
+    {
+        $crawler = $this->client->request('GET', '/signup');
+        $this->assertResponseIsSuccessful();
+
+        // Créer un fichier temporaire pour la photo de profil
+        $tmpFile = tempnam(sys_get_temp_dir(), 'test_');
+        copy(__DIR__ . '/../../public/uploads/profiles/profilePicture1.png', $tmpFile);
+        $photo = new UploadedFile(
+            $tmpFile,
+            'test.png',
+            'image/png',
+            null,
+            true
+        );
+
+        // Soumettre le formulaire directement
+        $this->client->submitForm("S'inscrire", [
+            'signup[email]' => 'nouveau@example.com',
+            'signup[password]' => 'Password@123',
+            'signup[confirmPassword]' => 'Password@123',
+            'signup[nom]' => 'Nouveau',
+            'signup[prenom]' => 'Utilisateur',
+            'signup[username]' => 'newuser',
+            'signup[dateNaissance]' => '1990-01-01',
+            'signup[profilePicture]' => $photo,
+        ]);
+
+        // Vérifier la redirection
+        $this->assertResponseRedirects('/');
+
+        // Suivre la redirection
+        $this->client->followRedirect();
+        $this->assertResponseIsSuccessful();
+
+        // Vérifications en base de données
+        $user = $this->entityManager->getRepository(Utilisateur::class)
+            ->findOneBy(['email' => 'nouveau@example.com']);
+
+        // Assertions plus complètes
+        $this->assertNotNull($user);
+        $this->assertEquals('Nouveau', $user->getNom());
+        $this->assertEquals('Utilisateur', $user->getPrenom());
+        $this->assertEquals('newuser', $user->getUsername());
+        $this->assertTrue(password_verify('Password@123', $user->getPassword()));
+        $this->assertNotNull($user->getPhotoProfile());
+        $this->assertTrue($user->isActif());
+
+        unlink($tmpFile);
+    }
+
+    // test fonctionnel
     public function testLogin(): void
     {
         $userRepository = $this->entityManager->getRepository(Utilisateur::class);
@@ -56,43 +109,6 @@ class SecurityControllerTest extends WebTestCase
 
         $this->client->followRedirect();
         $this->assertResponseIsSuccessful();
-    }
-
-    public function testSignup(): void
-    {
-        $crawler = $this->client->request('GET', '/signup');
-        $this->assertResponseIsSuccessful();
-
-        // Créer un fichier temporaire pour la photo de profil
-        $tmpFile = tempnam(sys_get_temp_dir(), 'test_');
-        copy(__DIR__ . '/../../public/uploads/profiles/profilePicture1.png', $tmpFile);
-        $photo = new UploadedFile(
-            $tmpFile,
-            'test.png',
-            'image/png',
-            null,
-            true
-        );
-
-        // Simuler une inscription
-        $form = $crawler->selectButton("S'inscrire")->form([
-            'signup[email]' => 'nouveau@example.com',
-            'signup[password]' => 'Password@123',
-            'signup[confirmPassword]' => 'Password@123',
-            'signup[nom]' => 'Nouveau',
-            'signup[prenom]' => 'Utilisateur',
-            'signup[username]' => 'newuser',
-            'signup[dateNaissance]' => '1990-01-01',
-            'signup[profilePicture]' => $photo,
-        ]);
-
-        $this->client->submit($form);
-
-        $this->assertResponseRedirects();
-
-        $user = $this->entityManager->getRepository(Utilisateur::class)
-            ->findOneBy(['email' => 'nouveau@example.com']);
-        $this->assertNotNull($user);
     }
 
     public function testForgotPassword(): void

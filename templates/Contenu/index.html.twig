@@ -22,7 +22,7 @@
                     <div class="content-info">
                         <h2>{{ contenu.titre }}</h2>
                         {% if contenu.description|length > 90 %}
-                            <p class="content-description">{{ contenu.description|slice(0, 90) }}...
+                            <p class="content-description">{{ contenu.description|slice(0, 80) }}...
                                 <a href="{{ path('app_contenu_description', {'id': contenu.id}) }}" data-target="modal">Afficher plus</a>
                             </p>
                         {% else %}
@@ -31,7 +31,7 @@
                         {% if contenu.url or (app.user and app.user.role.nom == 'ROLE_ADMIN') %}
                             <div class="content-footer">
                                 {% if contenu.url %}
-                                    <a href="{{ contenu.url }}" class="read-more">Lire plus</a>
+                                    <a href="{{ contenu.url }}" class="read-more" target="_blank" rel="noopener noreferrer">Lire plus</a>
                                 {% endif %}
                                 {% if app.user and app.user.role.nom == 'ROLE_ADMIN' %}
                                     <div class="user-menu">

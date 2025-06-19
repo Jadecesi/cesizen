@@ -360,4 +360,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    //test Fonctionnel
+    public function testAccesPageAdminRefusePourRoleUser()
+    {
+        $this->loginAsUserWithRole('ROLE_USER');
+
+        $this->client->request('GET', '/admin');
+        $this->assertResponseStatusCodeSame(403); // accès interdit
+    }
 }

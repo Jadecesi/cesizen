@@ -131,4 +131,17 @@ class UtilisateurTest extends TestCase
         $this->assertFalse($this->utilisateur->getResetPasswords()->contains($reset));
     }
 
+    //test unitaire
+    public function testGetAge()
+    {
+        $user = new Utilisateur();
+
+        $this->assertNull($user->getAge());
+
+        $dateNaissance = new \DateTime('2000-01-01');
+        $user->setDateNaissance($dateNaissance);
+
+        $expectedAge = $dateNaissance->diff(new \DateTime())->y;
+        $this->assertEquals($expectedAge, $user->getAge());
+    }
 }

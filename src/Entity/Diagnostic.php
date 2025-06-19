@@ -23,7 +23,7 @@ class Diagnostic
     #[Groups(['api_diagnostic'])]
     private ?float $totalStress = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Groups(['api_diagnostic'])]
     private ?\DateTimeInterface $dateCreation = null;
 
@@ -39,7 +39,7 @@ class Diagnostic
     public function __construct()
     {
         $this->events = new ArrayCollection();
-        $this->dateCreation = new \DateTime();
+        $this->dateCreation = new \DateTimeImmutable('now', new \DateTimeZone('Europe/Paris'));
     }
 
     public function getId(): ?int
@@ -62,15 +62,6 @@ class Diagnostic
     public function getDateCreation(): ?\DateTimeInterface
     {
         return $this->dateCreation;
-    }
-
-    public function setDateCreation(): static
-    {
-        $dateCreation = new \DateTime('now');
-
-        $this->dateCreation = $dateCreation;
-
-        return $this;
     }
 
     public function getUtilisateur(): ?Utilisateur

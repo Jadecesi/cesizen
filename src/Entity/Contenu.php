@@ -47,7 +47,7 @@ class Contenu
 
     public function __construct()
     {
-        $this->dateCreation = new \DateTime('now');
+        $this->dateCreation = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
     }
 
     public function getId(): ?int
@@ -86,7 +86,7 @@ class Contenu
 
     public function setDateModification(): static
     {
-        $dateModification = new \DateTime('now');
+        $dateModification = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
         $this->dateModification = $dateModification;
 
         return $this;

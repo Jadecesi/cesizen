@@ -983,10 +983,35 @@ tbody tr:nth-child(odd) {
 
 /*CONTENU*/
 .content-grid {
-    display: flex;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    display: grid;
+    grid-template-columns: 1fr; /* Par défaut: 1 colonne sur mobile */
     gap: 2rem;
     padding: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 1440px; /* Limite la largeur maximale */
+    margin: 0 auto; /* Centre la grille */
+}
+
+/* Tablette */
+@media (min-width: 768px) {
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .content-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 colonnes */
+    }
+}
+
+/* Grand écran */
+@media (min-width: 1440px) {
+    .content-grid {
+        grid-template-columns: repeat(4, 1fr); /* 4 colonnes maximum */
+    }
 }
 
 .content-title {
