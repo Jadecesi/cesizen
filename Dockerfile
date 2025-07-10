@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.5-rc-fpm-alpine3.21
 
 RUN apt-get update && apt-get install -y unzip git zip libicu-dev libzip-dev libonig-dev libxml2-dev \
     && docker-php-ext-install intl pdo pdo_mysql zip opcache
