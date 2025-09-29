@@ -1,0 +1,55 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  workflow_dispatch: # permet déclenchement manuel pour prod
+
+jobs:
+  ci-cd:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Phase d’initialisation
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install dependencies
+        run: composer install --no-progress --no-interaction --prefer-dist
+
+      # 2️⃣ Build : génération d’artefacts Docker
+      - name: Build Docker image
+        run: docker build -t myapp:latest .
+
+      # 3️⃣ Tests et analyse
+      - name: Run unit tests
+        # Utilisation de SQLite en mémoire
+        env:
+          DATABASE_URL: "sqlite:///:memory:"
+        run: php bin/phpunit --testdox
+
+      - name: Lint code
+        run: composer lint || echo "Lint warnings"
+
+      - name: Security check with Snyk
+        uses: snyk/actions@master
+        with:
+          command: test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # 4️⃣ Déploiement en recette (staging)
+      - name: Deploy to staging
+        if: success()
+        run: echo "Déploiement automatique en environnement de recette..."
+
+      # 5️⃣ Déploiement en production
+      - name: Deploy to production
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "Déploiement manuel / Canary Release vers la production..."
