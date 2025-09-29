@@ -25,8 +25,8 @@ jobs:
           echo "DATABASE_URL=sqlite:///:memory:" >> .env
           echo "MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
           echo "MERCURE_URL=${{ secrets.MERCURE_URL }}" >> .env
-          echo "MERCURE_PUBLIC_URL"=${{ secret.MERCURE_PUBLIC_URL }}" >> .env
-          echo "CORS_ALLOW_ORIGIN"=${{ secret.CORS_ALLOW_ORIGIN }}" >> .env
+          echo "MERCURE_PUBLIC_URL"=${{ secrets.MERCURE_PUBLIC_URL }}" >> .env
+          echo "CORS_ALLOW_ORIGIN"=${{ secrets.CORS_ALLOW_ORIGIN }}" >> .env
 
       # 3️⃣ Configuration de PHP
       - name: Set up PHP
