@@ -9,6 +9,8 @@ on:
 jobs:
   ci-cd:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "sqlite:///:memory:"
 
     steps:
       # 1️⃣ Phase d’initialisation
