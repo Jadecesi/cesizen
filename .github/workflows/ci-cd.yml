@@ -15,19 +15,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create .env.test
+      - name: Create .env file
         run: |
-          mkdir -p var
-          cat > .env.test <<EOF
-          APP_ENV=test
-          APP_SECRET=${{ secrets.APP_SECRET }}
-          DATABASE_URL="sqlite:///%kernel.project_dir%/var/test.db"
-    
-          MERCURE_JWT_SECRET="${{ secrets.MERCURE_JWT_SECRET }}"
-          MERCURE_URL="${{ secrets.MERCURE_URL }}"
-          MERCURE_PUBLIC_URL="${{ secrets.MERCURE_PUBLIC_URL }}"
-          CORS_ALLOW_ORIGIN="${{ secrets.CORS_ALLOW_ORIGIN }}"
-          EOF
+          echo "APP_ENV=\"prod\"" >> .env
+          echo "APP_SECRET=\"${{ secrets.APP_SECRET }}\"" >> .env
+          echo "DATABASE_URL=\"sqlite:///:memory:\"" >> .env
+          echo "MERCURE_JWT_SECRET=\"${{ secrets.MERCURE_JWT_SECRET }}\"" >> .env
+          echo "MERCURE_URL=\"${{ secrets.MERCURE_URL }}\"" >> .env
+          echo "MERCURE_PUBLIC_URL=\"${{ secrets.MERCURE_PUBLIC_URL }}\"" >> .env
+          echo "CORS_ALLOW_ORIGIN=\"${{ secrets.CORS_ALLOW_ORIGIN }}\"" >> .env
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
