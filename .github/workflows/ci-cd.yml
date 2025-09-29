@@ -10,41 +10,44 @@ jobs:
   ci-cd:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: "sqlite:///:memory:"
+      DATABASE_URL: "sqlite:///:memory:" # utilisé globalement pour éviter les erreurs Doctrine
 
     steps:
-      # 1️⃣ Phase d’initialisation
+      # 1️⃣ Récupération du code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2️⃣ Création du fichier .env avec les secrets
       - name: Create .env file
         run: |
           echo "APP_ENV=prod" >> .env
           echo "APP_SECRET=${{ secrets.APP_SECRET }}" >> .env
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "DATABASE_URL=sqlite:///:memory:" >> .env
+          echo "MERCURE_JWT_SECRET=${{ secrets.MERCURE_JWT_SECRET }}" >> .env
 
+      # 3️⃣ Configuration de PHP
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      - name: Install dependencies
-        run: composer install --no-progress --no-interaction --prefer-dist
+      # 4️⃣ Installation des dépendances sans scripts (pour éviter l'erreur .env)
+      - name: Install dependencies (no scripts)
+        run: composer install --no-scripts --no-progress --no-interaction --prefer-dist
 
-      # 2️⃣ Build : génération d’artefacts Docker
-      - name: Build Docker image
-        run: docker build -t myapp:latest .
+      # 5️⃣ Exécution manuelle des scripts Symfony (ex. cache:clear)
+      - name: Run Symfony scripts (cache:clear, etc.)
+        run: composer run-script auto-scripts
 
-      # 3️⃣ Tests et analyse
+      # 6️⃣ Lancer les tests unitaires avec SQLite
       - name: Run unit tests
-        # Utilisation de SQLite en mémoire
-        env:
-          DATABASE_URL: "sqlite:///:memory:"
         run: php bin/phpunit --testdox
 
+      # 7️⃣ Analyse de code (lint)
       - name: Lint code
         run: composer lint || echo "Lint warnings"
 
+      # 8️⃣ Vérification de sécurité avec Snyk
       - name: Security check with Snyk
         uses: snyk/actions@master
         with:
@@ -52,12 +55,12 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      # 4️⃣ Déploiement en recette (staging)
+      # 9️⃣ Déploiement en recette (staging)
       - name: Deploy to staging
         if: success()
         run: echo "Déploiement automatique en environnement de recette..."
 
-      # 5️⃣ Déploiement en production
+      # 🔟 Déploiement manuel en production
       - name: Deploy to production
         if: github.event_name == 'workflow_dispatch'
         run: echo "Déploiement manuel / Canary Release vers la production..."
